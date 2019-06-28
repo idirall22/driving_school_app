@@ -11,11 +11,16 @@ func GetStudent(ctx context.Context, id int64) (*Student, error) {
 		Joins("LEFT JOIN exams on exams.student_id = students.id").
 		Where("students.id=?", id).Rows()
 
+	defer rows.Close()
+
 	if err != nil {
 		return nil, err
 	}
+
 	exams := []*Exam{}
+
 	for rows.Next() {
+
 		exam := &Exam{}
 		if err := rows.Scan(
 			&student.ID,
@@ -56,14 +61,21 @@ func GetStudent(ctx context.Context, id int64) (*Student, error) {
 
 // GetStudents return a list of students
 func GetStudents(ctx context.Context, limit, offset int) ([]*Student, error) {
-	rows, err := mainService.db.Select("first_name, last_name, registred_date").
+
+	rows, err := mainService.db.
+		Select("first_name, last_name, registred_date").
 		Find(&Student{}).Limit(limit).Offset(offset).Rows()
+
+	defer rows.Close()
 
 	if err != nil {
 		return nil, err
 	}
+
 	var students = []*Student{}
+
 	for rows.Next() {
+
 		student := &Student{}
 		if err := mainService.db.ScanRows(rows, &student); err != nil {
 			return nil, err
@@ -74,16 +86,16 @@ func GetStudents(ctx context.Context, limit, offset int) ([]*Student, error) {
 }
 
 // CreateStudent create a student
-func CreateStudent(ctx context.Context, student *Student) error {
-	return nil
+func CreateStudent(ctx context.Context, student *Student) {
+	mainService.db.Create(&student)
 }
 
 // UpdateStudent update a student
-func UpdateStudent(ctx context.Context, student *Student) error {
-	return nil
+func UpdateStudent(ctx context.Context, student *Student) {
+	mainService.db.Save(&student)
 }
 
 // DeleteStudent update a student
-func DeleteStudent(ctx context.Context, id int64) error {
-	return nil
+func DeleteStudent(ctx context.Context, id uint) {
+	mainService.db.Where("id=?", id).Delete(Student{})
 }
