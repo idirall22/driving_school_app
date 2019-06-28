@@ -1,0 +1,17 @@
+{
+ "name": "driving_school",
+ "description": "Enter your project description",
+ "author": {
+  "name": "idir",
+  "email": "idirall22@gmail.com"
+ },
+ "version": "0.1.0",
+ "binaryname": "driving_school",
+ "frontend": {
+  "dir": "frontend",
+  "install": "npm install",
+  "build": "npm run build",
+  "bridge": "src",
+  "serve": "npm run serve"
+ }
+}
