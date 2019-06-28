@@ -52,9 +52,17 @@ func testGetStudent(t *testing.T) {
 			},
 		})
 
-	student, err := GetStudent(context.Background(), 1)
+	s, err := GetStudent(context.Background(), 1)
 	if err != nil {
 		t.Error(err)
 	}
-	fmt.Println(student.Exams[1].Comment)
+	fmt.Println(s)
+}
+
+func testGetStudents(t *testing.T) {
+	students, err := GetStudents(context.Background(), 10, 0)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(students[0].FirstName)
 }

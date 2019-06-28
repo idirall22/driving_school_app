@@ -56,7 +56,21 @@ func GetStudent(ctx context.Context, id int64) (*Student, error) {
 
 // GetStudents return a list of students
 func GetStudents(ctx context.Context, limit, offset int) ([]*Student, error) {
-	return nil, nil
+	rows, err := mainService.db.Select("first_name, last_name, registred_date").
+		Find(&Student{}).Limit(limit).Offset(offset).Rows()
+
+	if err != nil {
+		return nil, err
+	}
+	var students = []*Student{}
+	for rows.Next() {
+		student := &Student{}
+		if err := mainService.db.ScanRows(rows, &student); err != nil {
+			return nil, err
+		}
+		students = append(students, student)
+	}
+	return students, nil
 }
 
 // CreateStudent create a student
