@@ -98,12 +98,10 @@ func testUpdateStudent(t *testing.T) {
 func testDeleteStudent(t *testing.T) {
 
 	DeleteStudent(context.Background(), 1)
-	student, err := GetStudent(context.Background(), int64(dummyStudent.ID))
 
-	if err != nil {
-		t.Error(err)
-	}
-	if student.DeletedAt == nil {
-		t.Error("There is an error this sudents was deleted")
+	s, _ := GetStudents(context.Background(), 10, 0)
+
+	if len(s) != 0 {
+		t.Error("There is an error, list should to be equal to 0")
 	}
 }

@@ -24,7 +24,7 @@ func testCreateExamList(t *testing.T) {
 func testGetExamList(t *testing.T) {
 	examList, _ := GetExamList(context.Background(), 1)
 	if len(examList.Students) != 1 {
-		t.Error("There is an error, the length need to be 1")
+		t.Error("There is an error, the length should be 1")
 	}
 }
 
@@ -32,7 +32,7 @@ func testGetExamList(t *testing.T) {
 func testGetExamLists(t *testing.T) {
 	examLists, _ := GetExamLists(context.Background(), 10, 0)
 	if len(examLists) != 1 {
-		t.Error("There is an error, the length need to be 1")
+		t.Error("There is an error, the length should be 1")
 	}
 }
 
@@ -68,6 +68,6 @@ func testDeleteExamList(t *testing.T) {
 	e, _ := GetExamLists(context.Background(), 10, 0)
 
 	if len(e) != 0 {
-		t.Error("There is an error the lenght of examlists need to be equal to 0")
+		t.Error("There is an error the lenght of examlists should be equal to 0")
 	}
 }

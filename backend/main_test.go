@@ -9,12 +9,13 @@ func TestMain(t *testing.T) {
 	t.Run("getStudent", testGetStudent)
 	t.Run("getStudents", testGetStudents)
 	t.Run("updateStudents", testUpdateStudent)
-	// t.Run("deleteStudents", testDeleteStudent)
 
 	t.Run("createExamList", testCreateExamList)
 	t.Run("getExamList", testGetExamList)
 	t.Run("getExamLists", testGetExamLists)
 	t.Run("updateExamList", testUpdateExamList)
+
+	t.Run("deleteStudents", testDeleteStudent)
 	t.Run("deleteExamList", testDeleteExamList)
 
 	// t.Run("clean", testCleanDatabaseTestFilesAndDirectory)
