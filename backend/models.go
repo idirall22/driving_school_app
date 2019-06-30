@@ -58,9 +58,9 @@ func (e Exam) TableName() string {
 
 //ExamList a list of students who are added to pass an exam
 type ExamList struct {
-	ID       int64      `json:"id,omitempty"`
+	gorm.Model
 	DateExam time.Time  `json:"date_exam,omitempty"`
-	Students []*Student `gorm:"many2many:examlists_students" json:"students,omitempty"`
+	Students []*Student `gorm:"many2many:examlists_students;" json:"students,omitempty"`
 }
 
 // TableName :Database table name
