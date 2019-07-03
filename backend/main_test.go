@@ -18,5 +18,5 @@ func TestMain(t *testing.T) {
 	t.Run("deleteStudents", testDeleteStudent)
 	t.Run("deleteExamList", testDeleteExamList)
 
-	// t.Run("clean", testCleanDatabaseTestFilesAndDirectory)
+	t.Run("clean", testCleanDatabaseTestFilesAndDirectory)
 }

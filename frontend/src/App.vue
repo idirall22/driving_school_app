@@ -1,18 +1,25 @@
 <template>
   <div id="app">
-    <img alt="Wails logo" src="./assets/images/logo.png" class="logo zoomIn">
-    <HelloWorld/>
+    <div class="row">
+      <div class="col-3">
+        <MainMenu/>
+      </div>
+      <div class="col">
+        <router-view/>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
+import MainMenu from "./components/MainMenu.vue";
 import "./assets/css/main.css";
+import "./assets/css/bootstrap-4.3.1/bootstrap.min.css";
 
 export default {
   name: "app",
   components: {
-    HelloWorld
+    MainMenu
   }
 };
 </script>
