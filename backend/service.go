@@ -7,9 +7,15 @@ type service struct {
 	db *gorm.DB
 }
 
-var mainService = &service{}
+// MainService model
+var MainService = &service{}
 
 // InitService init the service
 func InitService(db *gorm.DB) {
-	mainService.db = db
+	MainService.db = db
+}
+
+//CloseService close database connection
+func CloseService() {
+	MainService.db.Close()
 }

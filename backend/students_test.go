@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"log"
 	"testing"
 	"time"
@@ -16,9 +15,9 @@ func connectDatabse() {
 		log.Println("Error to connect database")
 		log.Fatal(err)
 	}
-	mainService.db = db
-	mainService.db.DropTableIfExists(&Student{}, &Exam{}, &ExamList{})
-	mainService.db.AutoMigrate(&Student{}, &Exam{}, &ExamList{})
+	MainService.db = db
+	MainService.db.DropTableIfExists(&Student{}, &Exam{}, &ExamList{})
+	MainService.db.AutoMigrate(&Student{}, &Exam{}, &ExamList{})
 }
 
 var dummyStudent = &Student{
@@ -51,8 +50,8 @@ var dummyStudent = &Student{
 
 // Test GetStudent
 func testGetStudent(t *testing.T) {
-	// mainService.db.Create(&dummyStudent)
-	student, err := GetStudent(context.Background(), 1)
+	// MainService.db.Create(&dummyStudent)
+	student, err := MainService.GetStudent(1)
 	if err != nil {
 		t.Error(err)
 	}
@@ -63,7 +62,7 @@ func testGetStudent(t *testing.T) {
 
 // Test GetStudents
 func testGetStudents(t *testing.T) {
-	students, err := GetStudents(context.Background(), 10, 0)
+	students, err := MainService.GetStudents(10, 0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -74,7 +73,7 @@ func testGetStudents(t *testing.T) {
 
 func testCreateStudent(t *testing.T) {
 	connectDatabse()
-	CreateStudent(context.Background(), dummyStudent)
+	MainService.CreateStudent(dummyStudent)
 	if dummyStudent.ID == 0 {
 		t.Error("There is an error with created student")
 	}
@@ -83,9 +82,9 @@ func testCreateStudent(t *testing.T) {
 func testUpdateStudent(t *testing.T) {
 	name := "updated"
 	dummyStudent.FirstName = name
-	UpdateStudent(context.Background(), dummyStudent)
+	MainService.UpdateStudent(dummyStudent)
 
-	student, err := GetStudent(context.Background(), int64(dummyStudent.ID))
+	student, err := MainService.GetStudent(int64(dummyStudent.ID))
 
 	if err != nil {
 		t.Error(err)
@@ -97,9 +96,9 @@ func testUpdateStudent(t *testing.T) {
 
 func testDeleteStudent(t *testing.T) {
 
-	DeleteStudent(context.Background(), 1)
+	MainService.DeleteStudent(1)
 
-	s, _ := GetStudents(context.Background(), 10, 0)
+	s, _ := MainService.GetStudents(10, 0)
 
 	if len(s) != 0 {
 		t.Error("There is an error, list should to be equal to 0")
