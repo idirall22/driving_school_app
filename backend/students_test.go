@@ -51,10 +51,7 @@ var dummyStudent = &Student{
 // Test GetStudent
 func testGetStudent(t *testing.T) {
 	// MainService.db.Create(&dummyStudent)
-	student, err := MainService.GetStudent(1)
-	if err != nil {
-		t.Error(err)
-	}
+	student := MainService.GetStudent(1)
 	if student.FileNumber != dummyStudent.FileNumber {
 		t.Error("There is an error the file number does not match")
 	}
@@ -62,10 +59,7 @@ func testGetStudent(t *testing.T) {
 
 // Test GetStudents
 func testGetStudents(t *testing.T) {
-	students, err := MainService.GetStudents(10, 0)
-	if err != nil {
-		t.Error(err)
-	}
+	students := MainService.GetStudents(10, 0)
 	if students[0].FirstName != dummyStudent.FirstName {
 		t.Error("There is an error the first name does not match")
 	}
@@ -84,11 +78,8 @@ func testUpdateStudent(t *testing.T) {
 	dummyStudent.FirstName = name
 	MainService.UpdateStudent(dummyStudent)
 
-	student, err := MainService.GetStudent(int64(dummyStudent.ID))
+	student := MainService.GetStudent(int64(dummyStudent.ID))
 
-	if err != nil {
-		t.Error(err)
-	}
 	if student.FirstName != name {
 		t.Error("There is an error with first name")
 	}
@@ -98,7 +89,7 @@ func testDeleteStudent(t *testing.T) {
 
 	MainService.DeleteStudent(1)
 
-	s, _ := MainService.GetStudents(10, 0)
+	s := MainService.GetStudents(10, 0)
 
 	if len(s) != 0 {
 		t.Error("There is an error, list should to be equal to 0")

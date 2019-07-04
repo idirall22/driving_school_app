@@ -5,7 +5,7 @@ import (
 )
 
 // CreateExamList create an exam list
-func (s *service) CreateExamList(date time.Time, students []*Student) (*ExamList, error) {
+func (s *Service) CreateExamList(date time.Time, students []*Student) (*ExamList, error) {
 
 	examList := &ExamList{DateExam: date}
 	MainService.db.Create(&examList).Association("Students").Append(students)
@@ -14,7 +14,7 @@ func (s *service) CreateExamList(date time.Time, students []*Student) (*ExamList
 }
 
 // GetExamList get an exam list by date
-func (s *service) GetExamList(id uint) (*ExamList, error) {
+func (s *Service) GetExamList(id uint) (*ExamList, error) {
 
 	examList := &ExamList{}
 	MainService.db.Select("*").Find(&examList, "id=?", id).
@@ -23,14 +23,14 @@ func (s *service) GetExamList(id uint) (*ExamList, error) {
 }
 
 // GetExamLists get a list of exam list
-func (s *service) GetExamLists(limit, offset uint) ([]*ExamList, error) {
+func (s *Service) GetExamLists(limit, offset uint) ([]*ExamList, error) {
 	examLists := []*ExamList{}
 	MainService.db.Limit(limit).Offset(offset).Find(&examLists)
 	return examLists, nil
 }
 
 // UpdateExamList update an exam list
-func (s *service) UpdateExamList(examList *ExamList) error {
+func (s *Service) UpdateExamList(examList *ExamList) error {
 
 	MainService.db.Save(&examList).Association("Students").
 		Replace(examList.Students)
@@ -39,7 +39,7 @@ func (s *service) UpdateExamList(examList *ExamList) error {
 }
 
 // DeleteExamList update an exam list
-func (s *service) DeleteExamList(id uint) error {
+func (s *Service) DeleteExamList(id uint) error {
 	MainService.db.Unscoped().Where("id=?", id).
 		Delete(ExamList{}).Association("Students").Clear()
 	return nil

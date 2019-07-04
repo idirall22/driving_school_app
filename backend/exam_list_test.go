@@ -7,7 +7,7 @@ import (
 
 // Test create an exam list
 func testCreateExamList(t *testing.T) {
-	student, _ := MainService.GetStudent(1)
+	student := MainService.GetStudent(1)
 
 	examList, errEL := MainService.CreateExamList(
 		time.Now(), []*Student{student})
