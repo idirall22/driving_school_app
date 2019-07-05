@@ -139,9 +139,9 @@ export default {
 
         window.backend.Service.CreateStudentMap(this.student).then(err=>{
           if (err == null){
-            created = true;
+            this.created = true;
           }else{
-            created = false;
+            this.created = false;
           }
         });
       }

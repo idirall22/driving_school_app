@@ -23,7 +23,8 @@
           <td>{{student.last_name}}</td>
           <td>exam</td>
           <td>01/01/2019</td>
-          <td><a class="btn btn-warning" href="#">Infos</a></td>
+          <td><router-link class= "btn btn-danger" :to="{ name: 'studentDetails',
+          params: { id: student.ID}}">infos</router-link></td>
         </tr>
       </tbody>
     </table>
