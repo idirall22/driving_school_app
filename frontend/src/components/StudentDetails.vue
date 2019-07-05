@@ -4,7 +4,14 @@
       <h1>{{student.last_name}} {{student.first_name}}</h1>
     </div>
 
-    
+    <div class="row">
+      <div class="contentLeft col-9 ">
+      </div>
+      <div class="col" v-for="s in student.exams" :key="student.ID">
+        <p>{{s.exam}}</p>
+      </div>
+    </div>
+
 
   </div>
 </template>
@@ -29,4 +36,8 @@ export default {
 }
 </script>
 <style scoped>
+
+.contentLeft{
+  border-right: 1px solid #333;
+}
 </style>

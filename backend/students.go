@@ -15,7 +15,7 @@ func (s *Service) GetStudent(id int64) *Student {
 // GetStudentByName return a single student by last_name
 func (s *Service) GetStudentByName(lastName string) *Student {
 	student := &Student{}
-	MainService.db.Find(&student, "last_name=?", lastName).Related(&student.Exams)
+	MainService.db.Find(&student, "last_name LIKE ?", lastName+"%").Related(&student.Exams)
 	return student
 }
 
@@ -25,6 +25,15 @@ func (s *Service) GetStudents(limit, offset int) []*Student {
 	var students = []*Student{}
 	MainService.db.Limit(limit).Offset(offset).
 		Order("registred_date desc").Find(&students)
+	return students
+}
+
+// GetStudentsByName return a list of students
+func (s *Service) GetStudentsByName(limit, offset int, lastName string) []*Student {
+
+	var students = []*Student{}
+	MainService.db.Limit(limit).Offset(offset).Order("registred_date desc").
+		Find(&students, "last_name LIKE ?", lastName+"%")
 	return students
 }
 

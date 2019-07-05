@@ -13,9 +13,12 @@ func TestMain(t *testing.T) {
 	t.Run("getStudentByName", testGetStudentByName)
 
 	t.Run("getStudents", testGetStudents)
+	t.Run("getStudentsByName", testGetStudentsByName)
+
 	t.Run("updateStudents", testUpdateStudent)
 
-	t.Run("createExamList", testCreateExamList)
+	// t.Run("createExamList", testCreateExamList)
+	t.Run("createExamListMap", testCreateExamListMap)
 	t.Run("getExamList", testGetExamList)
 	t.Run("getExamLists", testGetExamLists)
 	t.Run("updateExamList", testUpdateExamList)

@@ -44,7 +44,6 @@ func (s Student) TableName() string {
 type Exam struct {
 	gorm.Model
 	ExamName  string    `json:"exam,omitempty"`
-	Examiner  string    `json:"examiner,omitempty"`
 	Comment   string    `json:"comment,omitempty"`
 	DateExam  time.Time `json:"date_exam,omitempty"`
 	Status    bool      `json:"status,omitempty"`
@@ -60,6 +59,7 @@ func (e Exam) TableName() string {
 type ExamList struct {
 	gorm.Model
 	DateExam time.Time  `json:"date_exam,omitempty"`
+	Examiner string     `json:"examiner,omitempty"`
 	Students []*Student `gorm:"many2many:examlists_students;" json:"students,omitempty"`
 }
 
@@ -67,3 +67,6 @@ type ExamList struct {
 func (s ExamList) TableName() string {
 	return "exam_lists"
 }
+
+type Map map[string]interface{}
+type MapList []Map

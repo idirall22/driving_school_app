@@ -36,13 +36,11 @@ var dummyStudent = &Student{
 	Image:         "image.png",
 	Exams: []*Exam{{
 		ExamName: "01",
-		Examiner: "examiner",
 		Comment:  "no comment",
 		DateExam: time.Now(),
 		Status:   false},
 		{
 			ExamName: "02",
-			Examiner: "examiner2",
 			Comment:  "no comment 2",
 			DateExam: time.Now(),
 			Status:   true},
@@ -69,6 +67,13 @@ func testGetStudentByName(t *testing.T) {
 // Test GetStudents
 func testGetStudents(t *testing.T) {
 	students := MainService.GetStudents(10, 0)
+	if students[0].FirstName != dummyStudent.FirstName {
+		t.Error("There is an error the first name does not match")
+	}
+}
+
+func testGetStudentsByName(t *testing.T) {
+	students := MainService.GetStudentsByName(10, 0, "mak")
 	if students[0].FirstName != dummyStudent.FirstName {
 		t.Error("There is an error the first name does not match")
 	}

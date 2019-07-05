@@ -7,6 +7,7 @@ Vue.config.devtools = true;
 
 import Bridge from "./wailsbridge";
 
+
 Bridge.Start(() => {
   new Vue({
     router,

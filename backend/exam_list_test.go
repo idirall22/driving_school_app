@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 )
@@ -19,17 +20,40 @@ func testCreateExamList(t *testing.T) {
 	}
 }
 
+// Test CreateExamListMap
+func testCreateExamListMap(t *testing.T) {
+	students := []*Student{}
+	student := MainService.GetStudent(1)
+	students = append(students, student)
+
+	var m []interface{}
+
+	data, _ := json.Marshal(students)
+	json.Unmarshal(data, &m)
+	examinerName := "examiner Name"
+	examList := MainService.CreateExamListMap("time.Now()", examinerName, m)
+
+	if len(examList.Students) != 1 {
+		t.Error("There is an error, with examlist created")
+	}
+	if examList.Examiner != examinerName {
+		t.Error("There is an error, with examlist created")
+	}
+
+}
+
 // Test get a single exam list
 func testGetExamList(t *testing.T) {
 	examList, _ := MainService.GetExamList(1)
-	if len(examList.Students) != 1 {
+
+	if examList.ID != 1 {
 		t.Error("There is an error, the length should be 1")
 	}
 }
 
 // Test get a list of exam list
 func testGetExamLists(t *testing.T) {
-	examLists, _ := MainService.GetExamLists(10, 0)
+	examLists := MainService.GetExamLists(10, 0)
 	if len(examLists) != 1 {
 		t.Error("There is an error, the length should be 1")
 	}
@@ -64,7 +88,7 @@ func testUpdateExamList(t *testing.T) {
 
 func testDeleteExamList(t *testing.T) {
 	MainService.DeleteExamList(1)
-	e, _ := MainService.GetExamLists(10, 0)
+	e := MainService.GetExamLists(10, 0)
 
 	if len(e) != 0 {
 		t.Error("There is an error the lenght of examlists should be equal to 0")

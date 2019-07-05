@@ -1,6 +1,8 @@
 package service
 
 import (
+	"encoding/json"
+	"log"
 	"time"
 )
 
@@ -13,6 +15,29 @@ func (s *Service) CreateExamList(date time.Time, students []*Student) (*ExamList
 	return examList, nil
 }
 
+// CreateExamListMap create an exam list
+func (s *Service) CreateExamListMap(date, examiner string,
+
+	studentsList []interface{}) *ExamList {
+
+	students := []*Student{}
+	data, err := json.Marshal(studentsList)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &students); err != nil {
+		log.Fatal(err)
+	}
+	if examiner == "" {
+		examiner = "No Name"
+	}
+
+	examList := &ExamList{DateExam: time.Now(), Examiner: examiner}
+	MainService.db.Create(&examList).Association("Students").Append(students)
+
+	return examList
+}
+
 // GetExamList get an exam list by date
 func (s *Service) GetExamList(id uint) (*ExamList, error) {
 
@@ -23,10 +48,10 @@ func (s *Service) GetExamList(id uint) (*ExamList, error) {
 }
 
 // GetExamLists get a list of exam list
-func (s *Service) GetExamLists(limit, offset uint) ([]*ExamList, error) {
+func (s *Service) GetExamLists(limit, offset uint) []*ExamList {
 	examLists := []*ExamList{}
-	MainService.db.Limit(limit).Offset(offset).Find(&examLists)
-	return examLists, nil
+	MainService.db.Limit(limit).Offset(offset).Order("date_exam desc").Find(&examLists)
+	return examLists
 }
 
 // UpdateExamList update an exam list
