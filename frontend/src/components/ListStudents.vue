@@ -12,6 +12,7 @@
           <th>Last Name</th>
           <th>Exam</th>
           <th>Date</th>
+          <th>Details</th>
         </tr>
 
       </thead>
@@ -22,6 +23,7 @@
           <td>{{student.last_name}}</td>
           <td>exam</td>
           <td>01/01/2019</td>
+          <td><a class="btn btn-warning" href="#">Infos</a></td>
         </tr>
       </tbody>
     </table>
@@ -40,11 +42,11 @@ export default {
   }),
   methods:{
     getStudentsList: function(){
-      if (this.students.length == 0){
-        window.backend.Service.GetStudents(10, 0).then(data=>{
-          this.students = data;
-        })
-      }
+      // if (this.students.length == 0){
+      window.backend.Service.GetStudents(10, 0).then(data=>{
+        this.students = data;
+      })
+      // }
     }
   }
 }

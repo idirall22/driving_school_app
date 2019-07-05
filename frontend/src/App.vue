@@ -1,10 +1,10 @@
 <template>
   <div id="app">
-    <div class="row">
-      <div class="col-3">
+    <div class="row m-3">
+      <div class="mainMenu shadow-sm m-0 p-0 mt-3 mr-3 col-3 bg-white">
         <MainMenu/>
       </div>
-      <div class="col">
+      <div class="shadow-sm m-0 p-3 mt-3 col bg-white">
         <router-view/>
       </div>
     </div>

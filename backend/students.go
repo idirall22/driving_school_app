@@ -1,5 +1,10 @@
 package service
 
+import (
+	"encoding/json"
+	"time"
+)
+
 // GetStudent return a single student
 func (s *Service) GetStudent(id int64) *Student {
 	student := &Student{}
@@ -15,8 +20,27 @@ func (s *Service) GetStudents(limit, offset int) []*Student {
 	return students
 }
 
+//CreateStudentMap create a student from a map
+func (s *Service) CreateStudentMap(studentInfo map[string]interface{}) error {
+
+	student := &Student{}
+	studentInfo["birthday"] = time.Now()
+	studentInfo["registred_date"] = time.Now()
+	data, err := json.Marshal(studentInfo)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(data, &student); err != nil {
+		return err
+	}
+	MainService.db.Create(&student)
+	return nil
+}
+
 // CreateStudent create a student
 func (s *Service) CreateStudent(student *Student) {
+	student.BirthDay = time.Now()
+	student.RegistredDate = time.Now()
 	MainService.db.Create(&student)
 }
 

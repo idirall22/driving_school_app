@@ -1,9 +1,9 @@
 <template>
   <div id="mainMenu">
-    <nav class="shadow-sm d-none d-md-block border-right">
+    <nav class="d-none d-md-block border-right">
       <div class="sidebar-sticky">
         <ul class="nav flex-column">
-          <div class="drivingSchoolName bg-light">
+          <div class="drivingSchoolName">
             <h5>Driving School</h5>
           </div>
           <!-- TODO make better solution -->
