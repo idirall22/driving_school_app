@@ -12,29 +12,37 @@ func (s *Service) GetStudent(id int64) *Student {
 	return student
 }
 
+// GetStudentByName return a single student by last_name
+func (s *Service) GetStudentByName(lastName string) *Student {
+	student := &Student{}
+	MainService.db.Find(&student, "last_name=?", lastName).Related(&student.Exams)
+	return student
+}
+
 // GetStudents return a list of students
 func (s *Service) GetStudents(limit, offset int) []*Student {
 
 	var students = []*Student{}
-	MainService.db.Limit(limit).Offset(offset).Find(&students)
+	MainService.db.Limit(limit).Offset(offset).
+		Order("registred_date desc").Find(&students)
 	return students
 }
 
 //CreateStudentMap create a student from a map
-func (s *Service) CreateStudentMap(studentInfo map[string]interface{}) error {
+func (s *Service) CreateStudentMap(studentInfo map[string]interface{}) (uint, error) {
 
 	student := &Student{}
 	studentInfo["birthday"] = time.Now()
 	studentInfo["registred_date"] = time.Now()
 	data, err := json.Marshal(studentInfo)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	if err := json.Unmarshal(data, &student); err != nil {
-		return err
+		return 0, err
 	}
 	MainService.db.Create(&student)
-	return nil
+	return student.ID, nil
 }
 
 // CreateStudent create a student

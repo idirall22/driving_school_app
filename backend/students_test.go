@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"log"
 	"testing"
 	"time"
@@ -57,6 +58,14 @@ func testGetStudent(t *testing.T) {
 	}
 }
 
+// Test GetStudentByName
+func testGetStudentByName(t *testing.T) {
+	student := MainService.GetStudentByName("makhlouf")
+	if student.FileNumber != dummyStudent.FileNumber {
+		t.Error("There is an error the file number does not match")
+	}
+}
+
 // Test GetStudents
 func testGetStudents(t *testing.T) {
 	students := MainService.GetStudents(10, 0)
@@ -69,6 +78,20 @@ func testCreateStudent(t *testing.T) {
 	connectDatabse()
 	MainService.CreateStudent(dummyStudent)
 	if dummyStudent.ID == 0 {
+		t.Error("There is an error with created student")
+	}
+}
+
+func testCreateStudentMap(t *testing.T) {
+	connectDatabse()
+
+	m := make(map[string]interface{})
+	data, _ := json.Marshal(dummyStudent)
+	json.Unmarshal(data, &m)
+
+	id, _ := MainService.CreateStudentMap(m)
+	dummyStudent.ID = id
+	if id != 1 {
 		t.Error("There is an error with created student")
 	}
 }
