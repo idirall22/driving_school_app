@@ -8,89 +8,140 @@ import (
 
 // Test create an exam list
 func testCreateExamList(t *testing.T) {
-	student := MainService.GetStudent(1)
+	students, err := MainService.GetStudents("", "", 3, 0)
+
+	if err != nil {
+		t.Error(err)
+	}
+	data, err := json.Marshal(students)
+	if err != nil {
+		t.Error(err)
+	}
+	var studentsMap = make([]interface{}, 30)
+	if err := json.Unmarshal(data, &studentsMap); err != nil {
+		t.Error(err)
+	}
+
+	examDate := time.Now().Format(timeFormat)
+	examiner := "examiner name"
 
 	examList, errEL := MainService.CreateExamList(
-		time.Now(), []*Student{student})
+		examDate, examiner, studentsMap)
+
 	if errEL != nil {
 		t.Error(errEL)
 	}
-	if examList.Students[0].FirstName != student.FirstName {
-		t.Error("There is an error, student does not match")
+
+	if examList != nil {
+		if examList.ID != 1 {
+			t.Error("There is an error when exam list was created")
+		}
 	}
-}
-
-// Test CreateExamListMap
-func testCreateExamListMap(t *testing.T) {
-	students := []*Student{}
-	student := MainService.GetStudent(1)
-	students = append(students, student)
-
-	var m []interface{}
-
-	data, _ := json.Marshal(students)
-	json.Unmarshal(data, &m)
-	examinerName := "examiner Name"
-	examList := MainService.CreateExamListMap("time.Now()", examinerName, m)
-
-	if len(examList.Students) != 1 {
-		t.Error("There is an error, with examlist created")
-	}
-	if examList.Examiner != examinerName {
-		t.Error("There is an error, with examlist created")
-	}
-
 }
 
 // Test get a single exam list
 func testGetExamList(t *testing.T) {
-	examList, _ := MainService.GetExamList(1)
+	examList, err := MainService.GetExamList(1)
 
-	if examList.ID != 1 {
-		t.Error("There is an error, the length should be 1")
+	if err != nil {
+		t.Error("There is an error, to get exam list")
+	}
+
+	if examList != nil {
+		if examList.ID != 1 {
+			t.Error("There is an error, the id should be 1")
+		}
+
+		if len(examList.StudentsExams) != 3 {
+			t.Error("There is an error, the length should be 1")
+		}
 	}
 }
 
 // Test get a list of exam list
 func testGetExamLists(t *testing.T) {
-	examLists := MainService.GetExamLists(10, 0)
-	if len(examLists) != 1 {
+	examLists, err := MainService.GetExamLists(10, 0)
+
+	if err != nil {
+		t.Error("There is an error, to get exam lists")
+	}
+	if len(examLists.ExamLists) != 1 && examLists.Count != 1 {
 		t.Error("There is an error, the length should be 1")
 	}
 }
 
 // Test Update exam list
 func testUpdateExamList(t *testing.T) {
-
-	examList, _ := MainService.GetExamList(1)
-	dateExam := time.Now().AddDate(0, 0, 1)
-	examList.DateExam = dateExam
-
-	// Update Date
-	MainService.UpdateExamList(examList)
-	examListUpdated, _ := MainService.GetExamList(1)
-
-	if examListUpdated.DateExam.Day() != dateExam.Day() {
-		t.Error("There is an error the dateExam was not updated")
+	examList, err := MainService.GetExamList(1)
+	if err != nil {
+		t.Error(err)
 	}
 
-	// Update students list
-	examList.Students = []*Student{}
-	MainService.UpdateExamList(examList)
+	examDate := time.Now().Format(timeFormat)
+	newExaminer := "new Examiner name"
+	m := make([]interface{}, 30)
 
-	examListUpdated, _ = MainService.GetExamList(1)
-
-	if len(examListUpdated.Students) != 0 {
-		t.Error("There is an error the students list was not updated")
+	data, err := json.Marshal(examList.StudentsExams)
+	if err != nil {
+		t.Error("Error to marshal students exams")
 	}
 
+	if err := json.Unmarshal(data, &m); err != nil {
+		t.Error("Error to unmarshal students exams bytes")
+	}
+
+	studentsToAdd, err := MainService.GetStudents("", "", 2, 3)
+	if err != nil {
+		t.Error(err)
+	}
+
+	data, err = json.Marshal(studentsToAdd)
+	if err != nil {
+		t.Error("Error to marshal students")
+	}
+	studentsToAddMap := make([]interface{}, 30)
+	if err := json.Unmarshal(data, &studentsToAddMap); err != nil {
+		t.Error("Error to unmarshal students exams bytes")
+	}
+
+	examListUpdated, errUpdate := MainService.UpdateExamList(1, examDate, newExaminer,
+		m, studentsToAddMap)
+
+	if errUpdate != nil {
+		t.Error(errUpdate)
+	}
+	if examListUpdated != nil {
+		if len(examListUpdated.StudentsExams) != testStudentsCount {
+			t.Errorf("There is an error the length should be %d", testStudentsCount)
+		}
+	}
 }
 
+// Test delete exam list
 func testDeleteExamList(t *testing.T) {
-	MainService.DeleteExamList(1)
-	e := MainService.GetExamLists(10, 0)
+	if err := MainService.DeleteExamList(1); err != nil {
+		t.Error(err)
+	}
+}
 
-	if len(e) != 0 {
-		t.Error("There is an error the lenght of examlists should be equal to 0")
+func testCleanedDatabase(t *testing.T) {
+	student := []Student{}
+	examList := []ExamList{}
+	exams := []Exam{}
+
+	MainService.db.Find(&student)
+	MainService.db.Find(&examList)
+	MainService.db.Find(&exams)
+
+	if len(student) != 0 {
+		t.Error("There is an error length should be zero")
+	}
+
+	if len(examList) != 0 {
+		t.Error("There is an error length should be zero")
+	}
+
+	if len(exams) != 0 {
+		t.Error("There is an error length should be zero")
 	}
 }

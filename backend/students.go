@@ -2,47 +2,50 @@ package service
 
 import (
 	"encoding/json"
-	"time"
+	"fmt"
 )
 
-// GetStudent return a single student
-func (s *Service) GetStudent(id int64) *Student {
+// GetStudent return a single student by provaiding id or lastName
+func (s *Service) GetStudent(studentID uint, lastName string) (*Student, error) {
 	student := &Student{}
-	MainService.db.Find(&student, "id=?", id).Related(&student.Exams)
-	return student
+
+	if studentID != 0 && lastName != "" {
+		lastName = ""
+	}
+
+	if err := MainService.db.Find(&student,
+		"id=? OR last_name=?", studentID, lastName).Error; err != nil {
+		return nil, err
+	}
+	return student, nil
 }
 
-// GetStudentByName return a single student by last_name
-func (s *Service) GetStudentByName(lastName string) *Student {
-	student := &Student{}
-	MainService.db.Find(&student, "last_name LIKE ?", lastName+"%").Related(&student.Exams)
-	return student
-}
+// GetStudents return a list of students,
+func (s *Service) GetStudents(lastName, ordering string, limit, offset int) ([]*Student, error) {
 
-// GetStudents return a list of students
-func (s *Service) GetStudents(limit, offset int) []*Student {
+	defaultOrdering := "desc"
+	if ordering != "" {
+		if ordering != "asc" || ordering != defaultOrdering {
+			ordering = defaultOrdering
+		}
+	} else {
+		ordering = defaultOrdering
+	}
 
+	orderingString := fmt.Sprintf("registred_date %s", ordering)
 	var students = []*Student{}
-	MainService.db.Limit(limit).Offset(offset).
-		Order("registred_date desc").Find(&students)
-	return students
+	if err := MainService.db.Limit(limit).Offset(offset).
+		Order(orderingString).
+		Find(&students, "last_name LIKE ?", lastName+"%").Error; err != nil {
+		return nil, err
+	}
+	return students, nil
 }
 
-// GetStudentsByName return a list of students
-func (s *Service) GetStudentsByName(limit, offset int, lastName string) []*Student {
-
-	var students = []*Student{}
-	MainService.db.Limit(limit).Offset(offset).Order("registred_date desc").
-		Find(&students, "last_name LIKE ?", lastName+"%")
-	return students
-}
-
-//CreateStudentMap create a student from a map
-func (s *Service) CreateStudentMap(studentInfo map[string]interface{}) (uint, error) {
+//CreateStudent create a student from a map
+func (s *Service) CreateStudent(studentInfo map[string]interface{}) (uint, error) {
 
 	student := &Student{}
-	studentInfo["birthday"] = time.Now()
-	studentInfo["registred_date"] = time.Now()
 	data, err := json.Marshal(studentInfo)
 	if err != nil {
 		return 0, err
@@ -50,23 +53,34 @@ func (s *Service) CreateStudentMap(studentInfo map[string]interface{}) (uint, er
 	if err := json.Unmarshal(data, &student); err != nil {
 		return 0, err
 	}
-	MainService.db.Create(&student)
+	if err := MainService.db.Create(&student).Error; err != nil {
+		return 0, err
+	}
 	return student.ID, nil
 }
 
-// CreateStudent create a student
-func (s *Service) CreateStudent(student *Student) {
-	student.BirthDay = time.Now()
-	student.RegistredDate = time.Now()
-	MainService.db.Create(&student)
-}
-
 // UpdateStudent update a student
-func (s *Service) UpdateStudent(student *Student) {
-	MainService.db.Save(&student)
+func (s *Service) UpdateStudent(studentUpdate map[string]interface{}) (uint, error) {
+	data, err := json.Marshal(studentUpdate)
+	if err != nil {
+		return 0, err
+	}
+	student := &Student{}
+	if err := json.Unmarshal(data, &student); err != nil {
+		return 0, err
+	}
+	dbRes := MainService.db.Save(&student)
+
+	if dbRes.Error != nil {
+		return 0, dbRes.Error
+	}
+	return uint(dbRes.RowsAffected), nil
 }
 
 // DeleteStudent update a student
-func (s *Service) DeleteStudent(id uint) {
-	MainService.db.Unscoped().Where("id=?", id).Delete(Student{})
+func (s *Service) DeleteStudent(id uint) error {
+	student := Student{ID: id}
+
+	err := MainService.db.Delete(&student).Error
+	return err
 }
