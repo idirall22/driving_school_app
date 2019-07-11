@@ -15,10 +15,10 @@
 
         </thead>
         <tbody>
-          <tr v-for="exam in examLists" :key="exam.ID">
-            <td>{{exam.ID}}</td>
+          <tr v-for="exam in examLists" :key="exam.id">
+            <td>{{exam.id}}</td>
             <td>{{exam.examiner}}</td>
-            <td>{{exam.date_exam}}</td>
+            <td>{{exam.date_exam | moment}}</td>
             <td><router-link :to="{ name: 'studentDetails'}"
               class="btn btn-danger">infos</router-link></td>
           </tr>
@@ -28,6 +28,7 @@
   </div>
 </template>
 <script>
+
 export default {
   name: "examLists",
   created: function(){
@@ -35,14 +36,17 @@ export default {
   },
   data: () => ({
     examLists:[],
-    test: ""
+    test: "",
+    examlistsCount: 0
   }),
+
   methods:{
     getExams:function(){
       window.backend.Service.GetExamLists(10, 0).then(data =>{
-        this.examLists = data;
+        this.examLists = data["examLists"];
+        this.examlistsCount = data["count"];
       })
-    }
+    },
   }
 }
 </script>

@@ -6,11 +6,16 @@ import AddExamList from '@/components/AddExamList.vue'
 import ExamLists from '@/components/ExamLists.vue'
 import StudentDetails from '@/components/StudentDetails.vue'
 
-import Datetime from 'vue-datetime'
-import 'vue-datetime/dist/vue-datetime.css'
+import 'bootstrap/dist/css/bootstrap.css';
+import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css';
+import moment from 'moment';
+
 
 Vue.use(Router)
-Vue.use(Datetime)
+Vue.filter("capitalize",str => str.charAt(0).toUpperCase() + str.slice(1))
+Vue.filter("moment",date => moment(date).format('D MMMM YYYY'))
+
+
 export default new Router({
   routes:[
     {path: "/", name: "listStudents",component: ListStudents},

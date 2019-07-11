@@ -9,10 +9,6 @@ type Service struct {
 	db *gorm.DB
 }
 
-// func (s *service) WailsInit(runtime *wails.Runtime) error {
-// 	return nil
-// }
-
 // MainService model
 var MainService = &Service{}
 

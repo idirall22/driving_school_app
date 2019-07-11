@@ -11,7 +11,6 @@
           <th>First Name</th>
           <th>Last Name</th>
           <th>Exam</th>
-          <th>Date</th>
           <th>Details</th>
         </tr>
 
@@ -21,10 +20,9 @@
           <td>{{student.file_number}}</td>
           <td>{{student.first_name}}</td>
           <td>{{student.last_name}}</td>
-          <td>exam</td>
-          <td>01/01/2019</td>
+          <td>{{student.next_exam}}</td>
           <td><router-link class= "btn btn-danger" :to="{ name: 'studentDetails',
-          params: { id: student.ID}}">infos</router-link></td>
+          params: { id: student.id}}">infos</router-link></td>
         </tr>
       </tbody>
     </table>
@@ -44,7 +42,7 @@ export default {
   methods:{
     getStudentsList: function(){
       // if (this.students.length == 0){
-      window.backend.Service.GetStudents(10, 0).then(data=>{
+      window.backend.Service.GetStudents("", "", 10, 0).then(data=>{
         this.students = data;
       })
       // }

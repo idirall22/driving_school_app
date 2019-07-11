@@ -17,27 +17,27 @@ var (
 
 //Student model
 type Student struct {
-	ID             uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt      time.Time  `json:"created_at,omitempty"`
-	UpdatedAt      time.Time  `json:"updated_at,omitempty"`
-	DeletedAt      *time.Time `sql:"index"`
-	FileNumber     string     `gorm:"unique" json:"file_number,omitempty"`
-	FirstName      string     `gorm:"first_name" json:"first_name,omitempty"`
-	LastName       string     `gorm:"index:last_name" json:"last_name,omitempty"`
-	MaidenName     string     `json:"maiden_name,omitempty"`
-	PhoneNumber    string     `json:"phone_number,omitempty"`
-	Job            string     `json:"job,omitempty"`
-	BirthDay       time.Time  `json:"birthday,omitempty"`
-	Gender         string     `json:"gender,omitempty"`
-	Country        string     `json:"country,omitempty"`
-	City           string     `json:"city,omitempty"`
-	Department     string     `json:"department,omitempty"`
-	AddressStreet  string     `json:"address_street,omitempty"`
-	RegistredDate  time.Time  `json:"registred_date,omitempty"`
-	Image          string     `gorm:"default:'imageURL'" json:"image,omitempty"`
-	NextExam       string     `gorm:"default:'Highway code'" json:"next_exam,omitempty"`
-	LastExamDate   *time.Time `gorm:"index:last_exam_date" json:"last_exam_date,omitempty"`
-	LastExamStatus bool       `gorm:"default:false" json:"last_exam_status,omitempty"`
+	ID            uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt     time.Time  `json:"created_at,omitempty"`
+	UpdatedAt     time.Time  `json:"updated_at,omitempty"`
+	DeletedAt     *time.Time `sql:"index"`
+	FileNumber    string     `gorm:"unique" json:"file_number,omitempty"`
+	FirstName     string     `gorm:"first_name" json:"first_name,omitempty"`
+	LastName      string     `gorm:"index:last_name" json:"last_name,omitempty"`
+	MaidenName    string     `json:"maiden_name,omitempty"`
+	PhoneNumber   string     `json:"phone_number,omitempty"`
+	Job           string     `json:"job,omitempty"`
+	BirthDay      time.Time  `json:"birthday,omitempty"`
+	Gender        string     `json:"gender,omitempty"`
+	Country       string     `json:"country,omitempty"`
+	City          string     `json:"city,omitempty"`
+	Department    string     `json:"department,omitempty"`
+	AddressStreet string     `json:"address_street,omitempty"`
+	RegistredDate time.Time  `json:"registred_date,omitempty"`
+	Image         string     `gorm:"default:'imageURL'" json:"image,omitempty"`
+	NextExam      string     `gorm:"default:'Highway code'" json:"next_exam,omitempty"`
+	LastExamDate  *time.Time `gorm:"index:last_exam_date" json:"last_exam_date,omitempty"`
+	Archived      bool       `json:"archived,omitempty"`
 }
 
 // TableName :Database table name
@@ -72,6 +72,7 @@ type ExamList struct {
 	DateExam      time.Time  `json:"date_exam,omitempty"`
 	Examiner      string     `json:"examiner,omitempty"`
 	StudentsExams []*Exam    `json:"students_exams,omitempty"`
+	Archived      bool       `json:"archived,omitempty"`
 }
 
 // TableName :Database table name

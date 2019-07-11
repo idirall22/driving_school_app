@@ -11,7 +11,9 @@
     "core-js": "^2.6.4",
     "luxon": "^1.16.1",
     "vue": "^2.5.22",
+    "vue-bootstrap-datetimepicker": "^5.0.1",
     "vue-datetime": "^1.0.0-beta.10",
+    "vue2-datepicker": "^2.12.0",
     "weekstart": "^1.0.0"
   },
   "devDependencies": {

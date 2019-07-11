@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var timeFormat = time.RFC850
+var timeFormat = time.RFC3339
 
 // CreateExamList create an exam list
 func (s *Service) CreateExamList(date, examiner string,
