@@ -17,11 +17,12 @@ Vue.filter("moment",date => moment(date).format('D MMMM YYYY'))
 
 
 export default new Router({
+  linkExactActiveClass: 'active',
   routes:[
-    {path: "/", name: "listStudents",component: ListStudents},
+    {path: "/students/", name: "listStudents",component: ListStudents},
     {path: "/add-student", name: "addStudent",component: AddStudents},
     {path: "/add-exam-list", name: "addExamList",component: AddExamList},
     {path: "/exam-lists", name: "examLists",component: ExamLists},
-    {path: "/:id", name: "studentDetails",component: StudentDetails}
+    {path: "/students/:id", name: "studentDetails",component: StudentDetails}
   ]
 })

@@ -8,34 +8,25 @@
           </div>
           <!-- TODO make better solution -->
           <!-- Students list -->
-          <li class="nav-item" v-on:click="setCurrentPage(0)"
-            v-bind:class="['',(currentPage === 0)?'active':'']">
-            <router-link to="/" class="nav-link">
+
+          <li class="nav-item">
+            <router-link :to="{ name: 'listStudents' }" class="nav-link">
               Students
             </router-link>
           </li>
-
-            <!-- Add new student -->
-          <li class="nav-item" v-on:click="setCurrentPage(1)"
-            v-bind:class="['',(currentPage === 1)?'active':'']">
-            <router-link to="/add-student" class="nav-link">
+          <li class="nav-item">
+            <router-link :to="{ name: 'addStudent' }" class="nav-link">
               Add Student
             </router-link>
           </li>
-
-            <!-- Add exam list -->
-          <li class="nav-item" v-on:click="setCurrentPage(2)"
-            v-bind:class="['',(currentPage === 2)?'active':'']">
-            <router-link to="/add-exam-list" class="nav-link">
-              Add Exam List
+          <li class="nav-item">
+            <router-link :to="{ name: 'addExamList' }" class="nav-link">
+              Add Student
             </router-link>
           </li>
-
-            <!-- exam lists -->
-          <li class="nav-item" v-on:click="setCurrentPage(3)"
-            v-bind:class="['',(currentPage === 3)?'active':'']">
-            <router-link to="/exam-lists" class="nav-link">
-              Exam Lists
+          <li class="nav-item">
+            <router-link :to="{ name: 'examLists' }" class="nav-link">
+              Lists Exams
             </router-link>
           </li>
         </ul>

@@ -28,6 +28,7 @@ type Student struct {
 	PhoneNumber   string     `json:"phone_number,omitempty"`
 	Job           string     `json:"job,omitempty"`
 	BirthDay      time.Time  `json:"birthday,omitempty"`
+	BirthCity     string     `json:"birth_city,omitempty"`
 	Gender        string     `json:"gender,omitempty"`
 	Country       string     `json:"country,omitempty"`
 	City          string     `json:"city,omitempty"`
