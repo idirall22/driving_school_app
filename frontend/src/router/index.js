@@ -14,7 +14,8 @@ import moment from 'moment';
 
 Vue.use(Router)
 Vue.filter("capitalize",str => str.charAt(0).toUpperCase() + str.slice(1))
-Vue.filter("moment",date => moment(date).format('D MMMM YYYY'))
+Vue.filter("moment",date => moment(date).format('DD MMMM YYYY'))
+Vue.filter("moment2",date => moment(date).format('DD-MM-YYYY'))
 
 
 export default new Router({

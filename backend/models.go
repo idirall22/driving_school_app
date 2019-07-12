@@ -54,7 +54,7 @@ type Exam struct {
 	DeletedAt  *time.Time `sql:"index"`
 	ExamName   string     `json:"exam,omitempty"`
 	DateExam   time.Time  `json:"date_exam,omitempty"`
-	Status     bool       `json:"status,omitempty"`
+	Status     bool       `gorm:"default:false" json:"status,omitempty"`
 	StudentID  uint       `json:"student_id,omitempty"`
 	Student    Student    `json:"student,omitempty"`
 	ExamListID uint       `json:"exam_list_id,omitempty"`

@@ -7,19 +7,20 @@
       <table class="table table-striped table-sm">
         <thead>
           <tr>
-            <th>N°</th>
-            <th>Examiner</th>
-            <th>Exam Date</th>
-            <th>Details</th>
+            <th class="align-middle text-center">N°</th>
+            <th class="align-middle text-center">Examiner</th>
+            <th class="align-middle text-center">Exam Date</th>
+            <th class="align-middle text-center">Details</th>
           </tr>
 
         </thead>
         <tbody>
           <tr v-for="exam in examLists" :key="exam.id">
-            <td>{{exam.id}}</td>
-            <td>{{exam.examiner}}</td>
-            <td>{{exam.date_exam | moment}}</td>
-            <td><router-link :to="{ name: 'examListDetails'}"
+            <td class="align-middle text-center">{{exam.id}}</td>
+            <td class="align-middle text-center">{{exam.examiner}}</td>
+            <td class="align-middle text-center">{{exam.date_exam | moment}}</td>
+            <td class="align-middle text-center"><router-link :to="{ name: 'examListDetails',
+                params: { id: exam.id}}"
               class="btn btn-danger">infos</router-link></td>
           </tr>
         </tbody>

@@ -1,8 +1,29 @@
 <template>
   <div id="addExamList">
     <!-- title -->
-    <div class="mb-5 mt-3">
-      <h1 class="aaa">Add Exam List</h1>
+    <div class="row">
+      <div class="col mb-5 mt-3">
+        <h1>Add Exam List</h1>
+      </div>
+      <div v-if="examListCreated"
+        class="col mb-5 mt-3 mr-3 alert alert-success" role="alert">
+        <button @click.prevent="closeAlert()" type="button" class="close"
+            data-dismiss="alert" aria-label="Close">
+           <span aria-hidden="true">&times;</span>
+         </button>
+        <h4 class="alert-heading">Exam List Created!</h4>
+        <hr>
+        <p>The exam list was added Successfuly</p>
+      </div>
+      <div v-if="!examListCreated && errorCreateExamList != null" class="col mb-5 mt-3 mr-3 alert alert-warning" role="alert">
+        <button @click.prevent="closeAlert()" type="button" class="close"
+            data-dismiss="alert" aria-label="Close">
+           <span aria-hidden="true">&times;</span>
+         </button>
+        <h4 class="alert-heading">Could not create a new exam list!</h4>
+        <hr>
+        <p>The Exam List was not created</p>
+      </div>
     </div>
 
     <!-- block one -->
@@ -18,7 +39,7 @@
       <div class="col-6">
         <label for="datepicker">Exam date</label>
         <vue-bootstrap-datetimepicker v-model="examDate"
-        id="datepicker"></vue-bootstrap-datetimepicker>
+        id="datepicker" :config="options"></vue-bootstrap-datetimepicker>
       </div>
 
     </div>
@@ -88,6 +109,7 @@
 </template>
 <script>
 import VueBootstrapDatetimepicker from 'vue-bootstrap-datetimepicker';
+import moment from 'moment'
 
 export default {
   name: "addExamList",
@@ -97,6 +119,13 @@ export default {
   },
 
   data: () => ({
+    options:{
+      format:"YYYY-MM-DD",
+      useCurrent: false
+    },
+    errorCreateExamList: null,
+    examListCreated: false,
+    data: null,
     studentLastName: "",
     examinerName: "Examiner Name",
     examDate: null,
@@ -139,11 +168,22 @@ export default {
     },
     addExamList: function(){
       window.backend.Service.CreateExamList(
-        this.examDate, this.examinerName, this.students)
-
-      this.students = [];
-      this.studentFound = [];
-      this.studentLastName="";
+        moment(this.examDate).format(), this.examinerName, this.students).then(
+          data=>{this.data = data},
+          err=>{this.errorCreateExamList= err}
+        )
+      if(this.errorCreateStudent != null){
+        this.examListCreated = false;
+      }else{
+        this.examListCreated = true;
+        this.students = [];
+        this.studentFound = [];
+        this.studentLastName="";
+      }
+    },
+    closeAlert:function(){
+      this.examListCreated = false;
+      this.errorCreateStudent = null;
     },
     deleteStudent: function(studentID){
       this.students.splice(studentID, 1)
