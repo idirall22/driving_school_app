@@ -42,7 +42,6 @@ func testCreateExamList(t *testing.T) {
 // Test get a single exam list
 func testGetExamList(t *testing.T) {
 	examList, err := MainService.GetExamList(1)
-
 	if err != nil {
 		t.Error("There is an error, to get exam list")
 	}

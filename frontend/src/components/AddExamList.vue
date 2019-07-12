@@ -17,7 +17,8 @@
       <!-- date picker -->
       <div class="col-6">
         <label for="datepicker">Exam date</label>
-        <vue-bootstrap-datetimepicker v-model="examDate" id="datepicker"></vue-bootstrap-datetimepicker>
+        <vue-bootstrap-datetimepicker v-model="examDate"
+        id="datepicker"></vue-bootstrap-datetimepicker>
       </div>
 
     </div>

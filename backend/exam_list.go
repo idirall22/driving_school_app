@@ -74,10 +74,26 @@ func (s *Service) CreateExamList(date, examiner string,
 func (s *Service) GetExamList(id uint) (*ExamList, error) {
 
 	examList := &ExamList{}
-	if err := MainService.db.Find(&examList, "id=?", id).
-		Related(&examList.StudentsExams, "StudentsExams").Error; err != nil {
+	tx := MainService.db.Begin()
+
+	if err := tx.Find(&examList, "id=?", id).
+		Related(&examList.StudentsExams, "StudentsExams").
+		Error; err != nil {
 		return nil, err
 	}
+	for i := 0; i < len(examList.StudentsExams); i++ {
+		if err := tx.Find(&examList.StudentsExams[i].Student, "id=?",
+			examList.StudentsExams[i].StudentID).Error; err != nil {
+			return nil, err
+		}
+	}
+	tx.Commit()
+	// if err := MainService.db.Find(&examList, "id=?", id).
+	// 	Related(&examList.StudentsExams, "StudentsExams").
+	// 	Error; err != nil {
+	// 	return nil, err
+	// }
+
 	return examList, nil
 }
 

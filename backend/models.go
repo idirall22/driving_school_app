@@ -55,7 +55,8 @@ type Exam struct {
 	ExamName   string     `json:"exam,omitempty"`
 	DateExam   time.Time  `json:"date_exam,omitempty"`
 	Status     bool       `json:"status,omitempty"`
-	StudentID  uint       `json:"students_id,omitempty"`
+	StudentID  uint       `json:"student_id,omitempty"`
+	Student    Student    `json:"student,omitempty"`
 	ExamListID uint       `json:"exam_list_id,omitempty"`
 }
 

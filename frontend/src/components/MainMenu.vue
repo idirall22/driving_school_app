@@ -21,7 +21,7 @@
           </li>
           <li class="nav-item">
             <router-link :to="{ name: 'addExamList' }" class="nav-link">
-              Add Student
+              Add Exam List
             </router-link>
           </li>
           <li class="nav-item">

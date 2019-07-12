@@ -5,6 +5,7 @@ import AddStudents from '@/components/AddStudent.vue'
 import AddExamList from '@/components/AddExamList.vue'
 import ExamLists from '@/components/ExamLists.vue'
 import StudentDetails from '@/components/StudentDetails.vue'
+import ExamListDetails from '@/components/ExamListDetails.vue'
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css';
@@ -21,8 +22,10 @@ export default new Router({
   routes:[
     {path: "/students/", name: "listStudents",component: ListStudents},
     {path: "/add-student", name: "addStudent",component: AddStudents},
-    {path: "/add-exam-list", name: "addExamList",component: AddExamList},
+    {path: "/students/:id", name: "studentDetails",component: StudentDetails},
+
     {path: "/exam-lists", name: "examLists",component: ExamLists},
-    {path: "/students/:id", name: "studentDetails",component: StudentDetails}
+    {path: "/add-exam-list", name: "addExamList",component: AddExamList},
+    {path: "/exam-lists/:id", name: "examListDetails",component: ExamListDetails}
   ]
 })

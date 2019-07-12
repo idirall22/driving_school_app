@@ -19,7 +19,7 @@
             <td>{{exam.id}}</td>
             <td>{{exam.examiner}}</td>
             <td>{{exam.date_exam | moment}}</td>
-            <td><router-link :to="{ name: 'studentDetails'}"
+            <td><router-link :to="{ name: 'examListDetails'}"
               class="btn btn-danger">infos</router-link></td>
           </tr>
         </tbody>
@@ -37,7 +37,7 @@ export default {
   data: () => ({
     examLists:[],
     test: "",
-    examlistsCount: 0
+    examlistsCount: 0,
   }),
 
   methods:{
