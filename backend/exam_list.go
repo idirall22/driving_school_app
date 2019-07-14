@@ -158,14 +158,15 @@ func (s *Service) UpdateExamList(examListID uint, date, examiner string,
 		DateExam: dateParsed,
 	}
 
-	data, err := json.Marshal(exams)
-	if err != nil {
-		return nil, err
+	if len(exams) > 0 {
+		data, err := json.Marshal(exams)
+		if err != nil {
+			return nil, err
+		}
+		if err := json.Unmarshal(data, &examList.StudentsExams); err != nil {
+			return nil, err
+		}
 	}
-	if err := json.Unmarshal(data, &examList.StudentsExams); err != nil {
-		return nil, err
-	}
-
 	examList.StudentsExams = append(examList.StudentsExams, newStudentsExams...)
 
 	if err := MainService.db.Save(&examList).Association("StudentsExams").
