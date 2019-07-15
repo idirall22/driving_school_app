@@ -61,11 +61,13 @@ func testGetExamList(t *testing.T) {
 func testGetExamLists(t *testing.T) {
 	examLists, err := MainService.GetExamLists(10, 0)
 
-	if err != nil {
-		t.Error("There is an error, to get exam lists")
-	}
-	if len(examLists.ExamLists) != 1 && examLists.Count != 1 {
-		t.Error("There is an error, the length should be 1")
+	if examLists != nil {
+		if err != nil {
+			t.Error("There is an error, to get exam lists")
+		}
+		if len(examLists.ExamLists) != 1 && examLists.Count != 1 {
+			t.Error("There is an error, the length should be 1")
+		}
 	}
 }
 

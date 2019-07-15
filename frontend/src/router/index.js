@@ -27,6 +27,7 @@ export default new Router({
 
     {path: "/exam-lists", name: "examLists",component: ExamLists},
     {path: "/add-exam-list", name: "addExamList",component: AddExamList},
-    {path: "/exam-lists/:id", name: "examListDetails",component: ExamListDetails}
+    {path: "/exam-lists/:id", name: "examListDetails",component: ExamListDetails},
+
   ]
 })

@@ -107,9 +107,13 @@ type ExamListsOut struct {
 func (s *Service) GetExamLists(limit, offset uint) (*ExamListsOut, error) {
 	examListsOut := &ExamListsOut{}
 
-	if err := MainService.db.Limit(limit).Offset(offset).
-		Order("date_exam desc").Find(&examListsOut.ExamLists).
-		Count(&examListsOut.Count).Error; err != nil {
+	if err := MainService.db.
+		Model(&ExamList{}).
+		Order("date_exam desc").
+		Count(&examListsOut.Count).
+		Limit(limit).Offset(offset).
+		Find(&examListsOut.ExamLists).
+		Error; err != nil {
 		return nil, err
 	}
 
