@@ -1,31 +1,19 @@
 <template>
   <div id="studentDetails">
     <div class="row">
-      <div class="col mb-5 mt-3">
-        <h1>Add Student</h1>
-      </div>
-      {{errorCreateStudent}}
-      <div v-if="studentCreated"
-        class="col mb-5 mt-3 mr-3 alert alert-success" role="alert">
-        <button @click.prevent="closeAlert()" type="button" class="close"
-            data-dismiss="alert" aria-label="Close">
-           <span aria-hidden="true">&times;</span>
-         </button>
-        <h4 class="alert-heading">Student Created!</h4>
-        <hr>
-        <p>The student was added Successfuly</p>
-      </div>
-      <div v-if="!studentCreated && errorCreateStudent != null" class="col mb-5 mt-3 mr-3 alert alert-warning" role="alert">
-        <button @click.prevent="closeAlert()" type="button" class="close"
-            data-dismiss="alert" aria-label="Close">
-           <span aria-hidden="true">&times;</span>
-         </button>
-        <h4 class="alert-heading">Could not create a new student!</h4>
-        <hr>
-        <p>The student was not created</p>
-      </div>
+      <Header initTitle="Add Student"></Header>
+
+      <!-- Message  -->
+       <Message
+        v-on:close-alert="closeAlert"
+        :create.sync="studentCreated"
+        :errorCreate.sync="errorCreateStudent"
+        :subject="subjectMessage">
+      </Message>
+
     </div>
 
+    <!-- Errors fields -->
     <div v-if="errors.length > 0" class="col mb-5 mt-3 mr-3 alert alert-danger" role="alert">
       <h4 class="alert-heading">there are some Errors!</h4>
       <hr>
@@ -167,17 +155,23 @@
 
 <script>
 import VueBootstrapDatetimepicker from 'vue-bootstrap-datetimepicker';
+import Header from './parts/Header';
+import Message from './parts/Message';
+import moment from 'moment';
 
 export default {
   name: "addStudent",
   components: {
-    VueBootstrapDatetimepicker
+    VueBootstrapDatetimepicker,
+    Header,
+    Message
   },
   data: () => ({
     options:{
-      // format:"YYYY/MM/DD",
+      format:"YYYY-MM-DD",
       useCurrent: false
     },
+    subjectMessage:"Student Created",
     student:{},
 
     fileNumber: "",
@@ -239,21 +233,24 @@ export default {
         this.errors.push("Registred Date")
       }
       if(this.errors.length == 0){
+        if(this.maidenName == ""){
+          this.maidenName = "None";
+        }
         this.student = {
           "first_name": this.firstName,
           "last_name": this.lastName,
           "maiden_name": this.maidenName,
           "phone_number": this.phoneNumber,
-          "birthday": this.birthday,
+          "birthday": moment(this.birthday).format(),
           "birth_city": this.birthCity,
           "job": this.job,
           "city": this.city,
           "file_number": this.fileNumber,
           "gender": this.gender,
           "country": this.country,
-          "department": this.department,
           "address_street": this.addressStreet,
-          "registred_date": this.registredDate,
+          "department": this.department,
+          "registred_date": moment(this.registredDate).format(),
         }
           window.backend.Service.CreateStudent(this.student).
           then(

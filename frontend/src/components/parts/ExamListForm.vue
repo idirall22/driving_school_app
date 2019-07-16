@@ -40,7 +40,10 @@
         <ul class="list-group p-0 m-0">
           <li v-for="student in studentsFound" :key="student.id"
             class="list-group-item d-flex justify-content-between align-items-center">
-            <p class="p-0 m-0">{{student.last_name}} {{student.first_name}}</p>
+            <p class="p-0 m-0">
+              {{student.last_name | capitalize}}
+              {{student.first_name | capitalize}}
+            </p>
             <button class="btn btn-primary m-0"
               @click="addStudent(student)"
               type="button"
@@ -104,7 +107,7 @@ export default {
         window.backend.Service.GetStudents(
           this.studentLastName, "", 10, 0).then(data=>{
           this.found = true;
-          this.studentsFound = data;
+          this.studentsFound = data["students"];
         })
       }else{
         this.studentsFound = [];

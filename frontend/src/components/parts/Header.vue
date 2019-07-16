@@ -1,8 +1,6 @@
 <template>
-  <div id="headerTitle">
-    <div class="col mb-5 mt-3">
-      <h1>{{ initTitle }}</h1>
-    </div>
+  <div class="col mb-3 mt-3" id="headerTitle">
+    <h1>{{ initTitle }}</h1>
   </div>
 </template>
 <script>

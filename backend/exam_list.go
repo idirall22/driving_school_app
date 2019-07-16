@@ -88,12 +88,6 @@ func (s *Service) GetExamList(id uint) (*ExamList, error) {
 		}
 	}
 	tx.Commit()
-	// if err := MainService.db.Find(&examList, "id=?", id).
-	// 	Related(&examList.StudentsExams, "StudentsExams").
-	// 	Error; err != nil {
-	// 	return nil, err
-	// }
-
 	return examList, nil
 }
 

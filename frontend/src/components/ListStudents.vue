@@ -19,7 +19,7 @@
           <td class="align-middle text-center">{{student.file_number}}</td>
           <td class="align-middle text-center">{{student.first_name | capitalize}}</td>
           <td class="align-middle text-center">{{student.last_name | capitalize}}</td>
-          <td class="align-middle text-center">{{getRegistredDate(student.registred_date)}}</td>
+          <td class="align-middle text-center">{{student.registred_date | moment2}}</td>
           <td class="align-middle text-center">{{student.next_exam}}</td>
           <td class="align-middle text-center"><router-link class= "btn btn-danger" :to="{ name: 'studentDetails',
           params: { id: student.id}}">infos</router-link></td>
@@ -99,9 +99,6 @@ export default {
         }
       }
     },
-    getRegistredDate: function(date){
-      return moment(date).format("DD-MM-YYYY")
-    }
   }
 }
 </script>

@@ -1,26 +1,27 @@
 <template>
   <div v-if="loaded" id="examListDetails">
-    <p>students already in exam: {{examList.students_exams}}</p>
-    <p>new students: {{changeStudentsExams}}</p>
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-danger" @click="deleteExamList" type="button">Delete</button>
+    </div>
+
     <div class="row">
       <Header initTitle="Exam List"></Header>
+
       <!-- Message  -->
        <Message
         v-on:close-alert="closeAlert"
         :create.sync="examListUpdated"
         :errorCreate.sync="errorUpdateExamList"
-        subject="subjectMessage">
+        :subject="subjectMessage">
       </Message>
     </div>
-    <div v-if="loaded" class="">
-      <!-- exam list form -->
-      <ExamListForm
+    <!-- exam list form -->
+    <ExamListForm
       :examinerName="examList.examiner"
       :examDate="examDate"
       :students="changeStudentsExams"
       ref="examListForm">
     </ExamListForm>
-    </div>
 
 
     <hr>
@@ -104,7 +105,8 @@ export default {
   },
   name: "ExamListDetails",
   data: () => ({
-    subjectMessage: "",
+    errorDelete: null,
+    subjectMessage: "Exam List Updated",
     examListUpdated: false,
     errorUpdateExamList: null,
     errorGetExamList: null,
@@ -148,6 +150,9 @@ export default {
           data=>{
             this.examList = data;
             this.examDate = moment(this.examList.date_exam).format();
+            if(this.examList.students_exams == null){
+              this.examList.students_exams = [];
+            }
             this.loaded = true;
           },
           err=>{this.errorGetExamList = err;}
@@ -175,7 +180,7 @@ export default {
         this.examList.id,
         moment(this.$refs.examListForm.changeExamDate).format(),
         this.$refs.examListForm.changeExaminerName,
-        [],
+        this.examList.students_exams,
         this.studentsAdded,
       ).then(
         data=>{this.data= data},
@@ -189,6 +194,14 @@ export default {
         this.errorUpdateExamList = null;
       }
 
+    },
+    deleteExamList: function(){
+      window.backend.Service.DeleteExamList(this.id).then(
+        err=>this.errorDelete = err
+      );
+      if(this.errorDelete == null){
+        this.$router.push({name: "examLists"})
+      }
     },
     closeAlert:function(){
       this.examListUpdated = false;
