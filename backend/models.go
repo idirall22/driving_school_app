@@ -15,6 +15,12 @@ var (
 	ExamThree = "Circuit"
 )
 
+// MultiLanguageField model
+type MultiLanguageField struct {
+	FR string `json:"fr"`
+	AR string `json:"ar"`
+}
+
 //Student model
 type Student struct {
 	ID            uint       `gorm:"primary_key" json:"id,omitempty"`
@@ -22,9 +28,9 @@ type Student struct {
 	UpdatedAt     time.Time  `json:"updated_at,omitempty"`
 	DeletedAt     *time.Time `sql:"index"`
 	FileNumber    string     `gorm:"unique" json:"file_number,omitempty"`
-	FirstName     string     `gorm:"first_name" json:"first_name,omitempty"`
-	LastName      string     `gorm:"index:last_name" json:"last_name,omitempty"`
-	MaidenName    string     `json:"maiden_name,omitempty"`
+	FirstName     string     `gorm:"type:varchar(512)" json:"first_name,omitempty"`
+	LastName      string     `gorm:"type:varchar(512);index:last_name" json:"last_name,omitempty"`
+	MaidenName    string     `gorm:"type:varchar(512)" json:"maiden_name,omitempty"`
 	PhoneNumber   string     `json:"phone_number,omitempty"`
 	Job           string     `json:"job,omitempty"`
 	BirthDay      time.Time  `json:"birthday,omitempty"`
@@ -33,7 +39,7 @@ type Student struct {
 	Country       string     `json:"country,omitempty"`
 	City          string     `json:"city,omitempty"`
 	Department    string     `json:"department,omitempty"`
-	AddressStreet string     `json:"address_street,omitempty"`
+	AddressStreet string     `gorm:"type:varchar(512)" json:"address_street,omitempty"`
 	RegistredDate time.Time  `json:"registred_date,omitempty"`
 	Image         string     `gorm:"default:'imageURL'" json:"image,omitempty"`
 	NextExam      string     `gorm:"default:'Highway code'" json:"next_exam,omitempty"`

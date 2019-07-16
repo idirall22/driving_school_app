@@ -30,7 +30,7 @@ var testStudentsCount = 5
 var dummyStudent = &Student{
 	FileNumber:    "0001",
 	FirstName:     "idir",
-	LastName:      "makhlouf",
+	LastName:      `"fr":"makhlouf", "ar": "مخلوف"`,
 	MaidenName:    " ",
 	PhoneNumber:   "0557083719",
 	Job:           "devloper",
