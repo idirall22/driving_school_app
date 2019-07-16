@@ -20,8 +20,15 @@ func (s *Service) GetStudent(studentID uint, lastName string) (*Student, error) 
 	return student, nil
 }
 
+// StudentsListOut model
+type StudentsListOut struct {
+	Students []*Student `json:"students"`
+	Count    uint       `json:"count"`
+}
+
 // GetStudents return a list of students,
-func (s *Service) GetStudents(lastName, ordering string, limit, offset int) ([]*Student, error) {
+func (s *Service) GetStudents(lastName, ordering string,
+	limit, offset int) (*StudentsListOut, error) {
 
 	defaultOrdering := "desc"
 	if ordering != "" {
@@ -33,13 +40,17 @@ func (s *Service) GetStudents(lastName, ordering string, limit, offset int) ([]*
 	}
 
 	orderingString := fmt.Sprintf("registred_date %s", ordering)
-	var students = []*Student{}
-	if err := MainService.db.Limit(limit).Offset(offset).
+	var studentsListOut = &StudentsListOut{}
+	if err := MainService.db.
+		Model(&Student{}).
 		Order(orderingString).
-		Find(&students, "last_name LIKE ?", lastName+"%").Error; err != nil {
+		Count(&studentsListOut.Count).
+		Limit(limit).Offset(offset).
+		Find(&studentsListOut.Students, "last_name LIKE ?", lastName+"%").
+		Error; err != nil {
 		return nil, err
 	}
-	return students, nil
+	return studentsListOut, nil
 }
 
 //CreateStudent create a student from a map

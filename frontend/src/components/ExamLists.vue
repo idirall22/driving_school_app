@@ -51,9 +51,9 @@ export default {
     url: "",
     examLists:[],
     test: "",
-    examlistsCount: 25,
+    examlistsCount: 0,
     limitPerPage: 10,
-    pages: 3,
+    pages: 1,
     currentPage: 1,
 
     bootstrapPaginationClasses: {

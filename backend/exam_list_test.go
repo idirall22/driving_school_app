@@ -8,12 +8,12 @@ import (
 
 // Test create an exam list
 func testCreateExamList(t *testing.T) {
-	students, err := MainService.GetStudents("", "", 3, 0)
+	studentsListOut, err := MainService.GetStudents("", "", 3, 0)
 
 	if err != nil {
 		t.Error(err)
 	}
-	data, err := json.Marshal(students)
+	data, err := json.Marshal(studentsListOut.Students)
 	if err != nil {
 		t.Error(err)
 	}
@@ -96,7 +96,7 @@ func testUpdateExamList(t *testing.T) {
 		t.Error(err)
 	}
 
-	data, err = json.Marshal(studentsToAdd)
+	data, err = json.Marshal(studentsToAdd.Students)
 	if err != nil {
 		t.Error("Error to marshal students")
 	}

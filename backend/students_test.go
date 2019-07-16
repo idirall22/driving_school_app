@@ -54,13 +54,13 @@ func testGetStudent(t *testing.T) {
 
 // Test GetStudents
 func testGetStudents(t *testing.T) {
-	students, _ := MainService.GetStudents("", "", 10, 0)
-	if students[0].FirstName != dummyStudent.FirstName {
+	studentsListOut, _ := MainService.GetStudents("", "", 10, 0)
+	if studentsListOut.Students[0].FirstName != dummyStudent.FirstName {
 		t.Error("There is an error the first name does not match")
 	}
 
-	students, _ = MainService.GetStudents(dummyStudent.LastName, "", 10, 0)
-	if len(students) != testStudentsCount {
+	studentsListOut, _ = MainService.GetStudents(dummyStudent.LastName, "", 10, 0)
+	if len(studentsListOut.Students) != testStudentsCount {
 		t.Error("There is an error the first name does not match")
 	}
 }
@@ -132,12 +132,12 @@ func testDeleteStudent(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	students, err := MainService.GetStudents("", "", 10, 0)
+	studentsListOut, err := MainService.GetStudents("", "", 10, 0)
 
 	if err != nil {
 		t.Error(err)
 	}
-	if len(students) != 0 {
+	if len(studentsListOut.Students) != 0 {
 		t.Errorf("There is an error the length should be %d", testStudentsCount-1)
 	}
 }
