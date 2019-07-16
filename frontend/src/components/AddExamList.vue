@@ -65,8 +65,8 @@ export default {
   data: () => ({
     errorCreateExamList: null,
     examListCreated: false,
-    studentLastName: "",
     examinerName: "",
+    studentLastName: "",
     examDate: null,
     found: false,
     students: []
@@ -76,8 +76,8 @@ export default {
     // Add exam list
     addExamList: function(){
       window.backend.Service.CreateExamList(
-        moment(this.$refs.examListForm.examDate).format(),
-        this.$refs.examListForm.examinerName,
+        moment(this.$refs.examListForm.changeExamDate).format(),
+        this.$refs.examListForm.changeExaminerName,
         this.$refs.examListForm .students)
 
         .then(

@@ -155,7 +155,9 @@ func (s *Service) UpdateExamList(examListID uint, date, examiner string,
 			tx.Commit()
 		}
 	}
-
+	if examiner == "" {
+		examiner = "No name"
+	}
 	examList := &ExamList{
 		ID:       examListID,
 		Examiner: examiner,

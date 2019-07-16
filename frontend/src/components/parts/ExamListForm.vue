@@ -5,14 +5,13 @@
       <!-- examiner name -->
       <div class="col-6">
         <label for="examinerName">Examiner</label>
-        <input v-model="examinerName" type="text" class="form-control" id="examinerName"
+        <input v-model="changeExaminerName" type="text" class="form-control" id="examinerName"
         placeholder="Search">
       </div>
-
       <!-- date picker -->
       <div class="col-6">
         <label for="datepicker">Exam date</label>
-        <vue-bootstrap-datetimepicker v-model="examDate"
+        <vue-bootstrap-datetimepicker v-model="changeExamDate"
         id="datepicker" :config="options"></vue-bootstrap-datetimepicker>
       </div>
 
@@ -57,27 +56,45 @@
 
 <script>
 import VueBootstrapDatetimepicker from 'vue-bootstrap-datetimepicker';
-import moment from 'moment'
+// import moment from 'moment'
 
 export default {
   name: "examListForm",
-  props: ['students'],
+  props: {
+    'students': Array,
+    'examinerName': String,
+    'examDate': null
+  },
   components: {
     VueBootstrapDatetimepicker
   },
   data: () => ({
-    examinerName: "",
-    examDate: null,
     studentLastName: "",
     found: false,
+    examDateCopy: null,
+    examinerNameCopy: "",
     studentsFound: [],
     options:{
       format:"YYYY-MM-DD",
       useCurrent: false
     },
   }),
-  mounted() {
-    this.examDate = moment().format();
+  computed:{
+    changeExamDate:{
+      get: function(){return this.examDateCopy},
+      set: function(value){this.examDateCopy = value}
+    },
+    changeExaminerName:{
+      get: function(){return this.examinerNameCopy},
+      set: function(value){ this.examinerNameCopy = value}
+    }
+  },
+  mounted(){
+    if(this.examinerName){
+      this.changeExaminerName = this.examinerName
+    }
+
+    this.changeExamDate = this.examDate
   },
   methods: {
     //Search a student in databse

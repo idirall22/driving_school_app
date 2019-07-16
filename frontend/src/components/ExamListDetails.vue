@@ -1,45 +1,28 @@
 <template>
-  <div id="examListDetails">
+  <div v-if="loaded" id="examListDetails">
+    <p>students already in exam: {{examList.students_exams}}</p>
+    <p>new students: {{changeStudentsExams}}</p>
     <div class="row">
-      <div class="col mb-5 mt-3">
-        <h1>Exam List</h1>
-        <button @click="switchEditMode" class="btn btn-warning">Edit mode</button>
-      </div>
-      <div v-if="examListUpdated"
-        class="col mb-5 mt-3 mr-3 alert alert-success" role="alert">
-        <button @click.prevent="closeAlert()" type="button" class="close"
-            data-dismiss="alert" aria-label="Close">
-           <span aria-hidden="true">&times;</span>
-         </button>
-        <h4 class="alert-heading">Exam List Updated!</h4>
-        <hr>
-        <p>The exam list was updated Successfuly</p>
-      </div>
-      <div v-if="!examListUpdated && errorUpdateExamList != null" class="col mb-5 mt-3 mr-3 alert alert-warning" role="alert">
-        <button @click.prevent="closeAlert()" type="button" class="close"
-            data-dismiss="alert" aria-label="Close">
-           <span aria-hidden="true">&times;</span>
-         </button>
-        <h4 class="alert-heading">Could not update the exam list!</h4>
-        <hr>
-        <p>The exam list was not updated</p>
-      </div>
+      <Header initTitle="Exam List"></Header>
+      <!-- Message  -->
+       <Message
+        v-on:close-alert="closeAlert"
+        :create.sync="examListUpdated"
+        :errorCreate.sync="errorUpdateExamList"
+        subject="subjectMessage">
+      </Message>
     </div>
-    <!-- block one -->
-    <div class="row">
-      <!-- examiner name -->
-      <div class="col-6">
-        <label for="examinerName">Examiner</label>
-        <input v-model="examList.examiner" type="text" class="form-control" id="examinerName"
-        placeholder="Search">
-      </div>
-      <!-- date picker -->
-      <div class="col-6">
-        <label for="datepicker">Exam date</label>
-        <vue-bootstrap-datetimepicker v-model="examDate"
-        id="datepicker" :config="options"></vue-bootstrap-datetimepicker>
-      </div>
+    <div v-if="loaded" class="">
+      <!-- exam list form -->
+      <ExamListForm
+      :examinerName="examList.examiner"
+      :examDate="examDate"
+      :students="changeStudentsExams"
+      ref="examListForm">
+    </ExamListForm>
     </div>
+
+
     <hr>
     <div class="table-responsive">
       <table class="table table-striped table-sm">
@@ -64,61 +47,119 @@
             <td class="align-middle text-center">B</td>
             <td class="align-middle text-center">{{exam.exam}}</td>
             <td class="align-middle text-center">
-              <input v-model="exam.status" type="checkbox" :disabled="!editMode?true: false"> </td>
+              <input v-model="exam.status" type="checkbox"> </td>
             <td class="align-middle text-center">
               <button @click.prevent="removeStudent(exam)"
                 type="button" class="form-control close"
-                data-dismiss="alert" aria-label="Close"
-                :disabled="!editMode?true: false">
+                data-dismiss="alert" aria-label="Close">
                <span aria-hidden="true">&times;</span>
              </button>
            </td>
           </tr>
+
+          <tr v-for="(student, index) in studentsAdded" :key="student.id">
+            <td class="align-middle text-center">{{index+1}}</td>
+            <td class="align-middle text-center">{{student.file_number}}</td>
+            <td class="align-middle text-center">{{student.first_name | capitalize}} {{student.last_name | capitalize}}</td>
+            <td class="align-middle text-center">{{student.birthday | moment2}}</td>
+            <td class="align-middle text-center">B</td>
+            <td class="align-middle text-center">{{student.next_exam}}</td>
+            <td class="align-middle text-center">
+              <input type="checkbox"> </td>
+            <td class="align-middle text-center">
+              <button @click.prevent="removeStudentAdded(student.id)"
+                type="button" class="form-control close"
+                data-dismiss="alert" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+             </button>
+           </td>
+          </tr>
+
         </tbody>
       </table>
     </div>
     <!-- button add student -->
     <button @click.prevent="editexamList()"
       class="btn btn-primary btn-lg btn-block"
-      type="submit" :disabled="!editMode?true: false">Edit Exam List
+      type="submit">Edit Exam List
     </button>
   </div>
 </template>
 
 <script>
-import VueBootstrapDatetimepicker from 'vue-bootstrap-datetimepicker';
+import Header from './parts/Header';
+import Message from './parts/Message';
+import ExamListForm from './parts/ExamListForm';
 import moment from 'moment'
 
 export default {
-  created:function() {
+  components: {
+    Header,
+    Message,
+    ExamListForm
+  },
+
+  mounted() {
     this.getExamList();
   },
-  components: {
-    VueBootstrapDatetimepicker
-  },
-  name: "examListDetails",
+  name: "ExamListDetails",
   data: () => ({
-    test:'dsqfsd',
-    time:null,
-    options:{
-      format:"YYYY-MM-DD",
-      useCurrent: false
-    },
-    id: 0,
-    examDate: null,
-    examList: null,
-    editMode: false,
-    data: null,
+    subjectMessage: "",
     examListUpdated: false,
     errorUpdateExamList: null,
+    errorGetExamList: null,
+    id: 0,
+    examList: {},
+    loaded: false,
+    examDate: null,
+    studentsAdded: [],
   }),
+  watch:{
+    studentsAdded: function(){
+      // Always check if the last student added is already
+      // in the list if yes delete it
+      if(this.studentsAdded.length > 0){
+        if(this.examList.students_exams){
+          for (var i = 0; i < this.examList.students_exams.length; i++) {
+            if(this.examList.students_exams[i].student.id ==
+              this.studentsAdded[this.studentsAdded.length -1 ].id){
+              this.removeStudentAdded(this.studentsAdded[this.studentsAdded.length -1 ].id)
+              return
+            }
+          }
+        }
+      }
+    }
+  },
+  computed:{
+    changeStudentsExams:{
+      get: function(){return this.studentsAdded;},
+      set: function(value){this.studentsAdded = value;}
+    }
+  },
   methods:{
     getExamList: function(){
+      // Get id from url
       this.id = this.$route.params.id;
-      window.backend.Service.GetExamList(this.id).then(data=>{
-        this.examList = data;
-        this.examDate = this.examList.date_exam;
-      });
+      if(this.id != 0){
+        // Make request to backend
+        window.backend.Service.GetExamList(this.id)
+        .then(
+          data=>{
+            this.examList = data;
+            this.examDate = moment(this.examList.date_exam).format();
+            this.loaded = true;
+          },
+          err=>{this.errorGetExamList = err;}
+        );
+      }
+    },
+    removeStudentAdded: function(studentID){
+      for (var i = 0; i < this.studentsAdded.length; i++) {
+        if(this.studentsAdded[i].id == studentID){
+          this.studentsAdded.splice(i, 1)
+        }
+      }
     },
     removeStudent: function(exam){
       for (var i = 0; i < this.examList.students_exams.length; i++) {
@@ -127,28 +168,27 @@ export default {
         }
       }
     },
+
     editexamList: function(){
+      // Update Exam list
       window.backend.Service.UpdateExamList(
         this.examList.id,
-        this.examDate = moment(this.examDate).format(),
-        this.examList.examiner,
-        this.examList.students_exams,
+        moment(this.$refs.examListForm.changeExamDate).format(),
+        this.$refs.examListForm.changeExaminerName,
         [],
+        this.studentsAdded,
       ).then(
         data=>{this.data= data},
         err=>{this.errorUpdateExamList = err},
       );
+
       if(this.errorUpdateExamList != null){
         this.examListUpdated = false;
       }else{
         this.examListUpdated = true;
         this.errorUpdateExamList = null;
-        this.switchEditMode();
       }
 
-    },
-    switchEditMode: function(){
-      this.editMode = !this.editMode;
     },
     closeAlert:function(){
       this.examListUpdated = false;
