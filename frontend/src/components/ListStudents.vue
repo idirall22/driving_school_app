@@ -6,8 +6,8 @@
       <thead>
         <tr>
           <th class="align-middle text-center">N°</th>
-          <th class="align-middle text-center">Prénom</th>
           <th class="align-middle text-center">Nom</th>
+          <th class="align-middle text-center">Prénom</th>
           <th class="align-middle text-center">Date d'Inscription</th>
           <th class="align-middle text-center">Examen</th>
           <th class="align-middle text-center">Détails</th>
@@ -17,16 +17,16 @@
       <tbody>
         <tr v-for="student in students" :key="student.key">
           <td class="align-middle text-center">{{student.file_number}}</td>
-          <td class="align-middle text-center">{{student.first_name | capitalize}}</td>
           <td class="align-middle text-center">{{student.last_name | capitalize}}</td>
+          <td class="align-middle text-center">{{student.first_name | capitalize}}</td>
           <td class="align-middle text-center">{{student.registred_date | moment2}}</td>
-          <td class="align-middle text-center">{{student.next_exam}}</td>
+          <td class="align-middle text-center">{{getStudentNextExamName(student)}}</td>
           <td class="align-middle text-center"><router-link class= "btn btn-danger" :to="{ name: 'studentDetails',
           params: { id: student.id}}">infos</router-link></td>
         </tr>
       </tbody>
     </table>
-    <div class="d-flex justify-content-center m-5">
+    <div v-if="pages>1" class="d-flex justify-content-center m-5">
       <v-pagination
         v-model="currentPage"
         :page-count="pages"
@@ -61,7 +61,7 @@ export default {
     limitPerPage: 10,
     pages: 1,
     currentPage: 1,
-
+    data:null,
     bootstrapPaginationClasses: {
       ul: 'pagination',
       li: 'page-item',
@@ -83,7 +83,14 @@ export default {
       .then(
         data=>{
           this.students = data["students"];
-          this.studentsCount = data["count"],
+          this.studentsCount = data["count"];
+
+          for (var i = 0; i < this.students.length; i++) {
+            let fn = JSON.parse(this.students[i].first_name);
+            this.students[i].first_name = fn.fr;
+            let ln = JSON.parse(this.students[i].last_name);
+            this.students[i].last_name = ln.fr;
+          }
           this.loaded = true;
           this.getNumPages();
         },
@@ -97,6 +104,16 @@ export default {
         if(remainder>0){
           this.pages++;
         }
+      }
+    },
+    getStudentNextExamName: function(student){
+      switch (student.next_exam) {
+        case "Highway code":
+          return "Code";
+        case "Niche":
+          return "Créneau";
+        case "Circuit":
+          return "Circuit";
       }
     },
   }

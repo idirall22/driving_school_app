@@ -1,194 +1,479 @@
 <template>
-  <div id="studentDetails">
-    <div class="row mb-5 mt-3">
-      <div class="col">
-        <h1 class="mb-3">{{student.last_name | capitalize}} {{student.first_name | capitalize}}</h1>
-        <button @click="switchEditMode" class="btn btn-warning">Edit mode</button>
+  <div v-if="ready" id="studentDetails">
+    <b-alert
+      v-model="studentUpdated"
+      :variant="alertVariant"
+      dismissible
+      @dismissed="closeAlert()">
+      {{alertMessage}}
+    </b-alert>
+      <Header initTitle="Détails"></Header>
+
+      <p>Prochain Examen:</p>
+      <b-progress :max="3" class="mb-3" height= "2rem">
+        <b-progress-bar
+          variant="success"
+          :value="getStudentNextExamPourcent()"
+        > <strong>{{getStudentNextExamName()}}</strong>
+        </b-progress-bar>
+      </b-progress>
+
+    <b-form @submit="editStudent">
+      <div class="row">
+          <div class="col">
+            <!-- First name  -->
+            <b-form-group
+              id="firstName-group"
+              label="Prénom:"
+              label-for="firstName">
+
+            <b-form-input
+              id="firstName"
+              v-model="student.first_name"
+              type="text"
+              placeholder="Prénom"
+              required
+            ></b-form-input>
+            </b-form-group>
+            <!-- end First name  -->
+
+            <!-- Last name  -->
+            <b-form-group
+              id="lastName-group"
+              label="Nom:"
+              label-for="lastName">
+
+              <b-form-input
+                id="lastName"
+                v-model="student.last_name"
+                type="text"
+                placeholder="Nom"
+                required
+              ></b-form-input>
+            </b-form-group>
+            <!-- end Last name  -->
+
+            <!-- Maiden name  -->
+            <b-form-group
+              id="maidenName-group"
+              label="Nom De Jeune Fille:"
+              label-for="maidenName">
+
+              <b-form-input
+                id="maidenName"
+                v-model="student.maiden_name"
+                type="text"
+                placeholder= "Nom De Jeune Fille"
+                required
+              ></b-form-input>
+            </b-form-group>
+            <!-- end Maiden name  -->
+
+          </div>
+
+          <div class="col">
+            <!-- AraFirst name  -->
+            <b-form-group
+              id="firstName-group"
+              label=":الإسم"
+              label-for="firstName">
+
+              <b-form-input
+              id="firstName"
+                v-model="student.ar_first_name"
+                type="text"
+                placeholder="الإسم"
+                required
+              ></b-form-input>
+            </b-form-group>
+            <!-- end First name  -->
+
+            <!-- Arabic Last name  -->
+            <b-form-group
+              id="lastName-group"
+              label=":اللقب"
+              label-for="lastName">
+
+              <b-form-input
+                id="lastName"
+                v-model="student.ar_last_name"
+                type="text"
+                placeholder="اللقب"
+                required
+              ></b-form-input>
+            </b-form-group>
+
+            <!-- end Last name  -->
+
+            <!-- Arabic Maiden name  -->
+            <b-form-group
+              id="maidenName-group"
+              label=":إسم العائلة قبل الزواج"
+              label-for="maidenName">
+
+              <b-form-input
+                direction:RTL
+                id="maidenName"
+                v-model="student.ar_maiden_name"
+                type="text"
+                placeholder="إسم العائلة قبل الزواج"
+                required
+              ></b-form-input>
+            </b-form-group>
+
+            <!-- end Maiden name  -->
+
+          </div>
       </div>
-      <div class="col-3 alert alert-primary pb-0" role="alert">
-        <h4>{{student.next_exam | capitalize}}</h4>
-        <p v-if="student.last_exam_date != null">Last Exam: {{student.last_exam_date}}</p>
-        <p v-if="student.last_exam_date == null"> Not yet</p>
-      </div>
-    </div>
-    <!-- form -->
-    <form class="needs-validation" novalidate="">
 
       <div class="row">
+        <div class="col">
+          <!-- Birthday -->
+          <b-form-group
+            id="birthday-group"
+            label="Date de Naissance:"
+            label-for="birthday">
 
-        <!-- first name -->
-        <div class="col-6 mb-3">
-          <label for="firstName">First name</label>
-          <input v-model="student.first_name" type="text" class="form-control"
-          id="firstName" placeholder="" value="" required :readonly="!editMode?true: false">
+            <vue-bootstrap-datetimepicker
+              v-model="birthday"
+              :config="options"
+            >
+            </vue-bootstrap-datetimepicker>
+          </b-form-group>
+          <!-- end Birthday -->
         </div>
+        <div class="col">
+          <!-- Birth Country  -->
+          <b-form-group
+            id="country-group"
+            label="Pays De Naissance:"
+            label-for="country">
 
-        <!-- last name -->
-        <div class="col-md-6 mb-3">
-          <label for="lastName">Last name</label>
-          <input v-model="student.last_name" type="text" class="form-control"
-          id="lastName" placeholder="" value="" required :readonly="!editMode?true: false">
+            <b-form-input
+              id="country"
+              v-model="student.birth_city"
+              type="text"
+              placeholder="Algerie"
+              required
+            ></b-form-input>
+          </b-form-group>
+          <!-- end Birth Country  -->
+        </div>
+        <div class="col">
+
+                <!-- Gender -->
+                <b-form-group
+                  id="gender-group"
+                  label="Sexe:"
+                  label-for="gender">
+
+                  <b-form-select
+                    class="mb-2 mr-sm-2 mb-sm-0"
+                    v-model="student.gender"
+                    :options="[
+                      { 'value': 'homme', 'text': 'Homme'},
+                      { 'value': 'femme', 'text': 'Femme'},
+                    ]"
+                    id="gender"
+                  >
+                  <template slot="first">
+                    <option :value="null" disabled>Choisire ...</option>
+                  </template>
+                  </b-form-select>
+                </b-form-group>
+                <!-- end Gender -->
         </div>
       </div>
 
       <div class="row">
+        <div class="col">
+          <!-- Registred Date -->
+          <b-form-group
+            id="registredDate-group"
+            label="Date d'Inscription:"
+            label-for="registredDate">
 
-        <!-- maiden name -->
-        <div class="col mb-3">
-          <label for="address">Maiden Name</label>
-          <input v-model="student.maiden_name" type="text" class="form-control" id="maidenName"
-          placeholder="" required :readonly="!editMode?true: false">
+            <vue-bootstrap-datetimepicker
+              v-model="registredDate"
+              :config="options"
+            >
+            </vue-bootstrap-datetimepicker>
+          </b-form-group>
+          <!-- end Registred Date -->
         </div>
 
-        <!-- phone number -->
-        <div class="col mb-3">
-          <label for="address">Phone Number</label>
-          <input v-model="student.phone_number" type="text" class="form-control"
-          id="address" placeholder="" required :readonly="!editMode?true: false">
-        </div>
+        <div class="col">
+          <!-- Phone Number  -->
+          <b-form-group
+            id="phoneNumber-group"
+            label="Numero De Telephone:"
+            label-for="phoneNumber">
 
+            <b-form-input
+              id="phoneNumber"
+              v-model="student.phone_number"
+              type="text"
+              placeholder="01-23-45-67-89"
+              required
+            ></b-form-input>
+          </b-form-group>
+          <!-- end Phone Number  -->
+        </div>
+      </div>
+
+      <!-- Address  -->
+      <b-form-group
+        id="address-group"
+        label="Adresse:"
+        label-for="address">
+
+        <b-form-input
+          id="address"
+          v-model="student.address_street"
+          type="text"
+          placeholder="adresse"
+          required
+        ></b-form-input>
+      </b-form-group>
+      <!-- end Address  -->
+
+      <div class="row">
+        <div class="col">
+          <!-- Department  -->
+          <b-form-group
+            id="department-group"
+            label="Daira:"
+            label-for="department">
+
+            <b-form-input
+              id="department"
+              v-model="student.department"
+              type="text"
+              placeholder="Bir el djir"
+              required
+            ></b-form-input>
+          </b-form-group>
+          <!-- end Department  -->
+        </div>
+        <div class="col">
+          <!-- City  -->
+          <b-form-group
+            id="city-group"
+            label="Wilaya:"
+            label-for="city">
+
+            <b-form-input
+              id="city"
+              v-model="student.city"
+              type="text"
+              placeholder="Oran"
+              required
+            ></b-form-input>
+          </b-form-group>
+          <!-- end City -->
+        </div>
       </div>
 
       <div class="row">
+        <div class="col">
+          <!-- File Number -->
+          <b-form-group
+            id="fileNumber-group"
+            label="Numero De Dossier:"
+            label-for="fileNumber">
 
-        <!-- birthday -->
-        <div class="col-4 mb-3">
-          <label for="birthday">Birthday</label>
-          <vue-bootstrap-datetimepicker v-model="birthday" :config="options"
-          required :disabled="!editMode?true: false" ></vue-bootstrap-datetimepicker>
+            <b-form-input
+              id="fileNumber"
+              v-model="student.file_number"
+              type="text"
+              placeholder="1234"
+              required
+            ></b-form-input>
+          </b-form-group>
+          <!-- end File Number -->
         </div>
+        <div class="col">
+          <!-- job -->
+          <b-form-group
+            id="job-group"
+            label="Travaille:"
+            label-for="job">
 
-        <!-- birth city -->
-        <div class="col-4 mb-3">
-          <label for="birthCity">BirthCity</label>
-          <select v-model="student.birth_city" class="custom-select d-block" id="birthCity"
-          required :disabled="!editMode?true: false">
-          <option value="oran">Oran</option>
-          </select>
-        </div>
-
-        <!-- Country -->
-        <div class="col mb-3">
-          <label for="country">Country</label>
-          <input v-model="student.country" type="text" class="form-control"
-          id="country" placeholder="" required :readonly="!editMode?true: false">
-        </div>
-
-        <!-- gender -->
-        <div class="col-4 mb-3">
-          <label for="gender">Gender</label>
-          <select v-model="student.gender" class="custom-select d-block w-100"
-          id="gender" required :disabled="!editMode?true: false">
-
-          <option value="man">Man</option>
-          <option value="woman">Woman</option>
-          </select>
-        </div>
-
-        <!-- registred date -->
-        <div class="col-4 mb-3">
-          <label for="registredDate">Registred Date</label>
-          <vue-bootstrap-datetimepicker v-model="registredDate" :config="options"
-          readonly ></vue-bootstrap-datetimepicker>
+            <b-form-input
+              id="job"
+              v-model="student.job"
+              type="text"
+              placeholder=""
+              required
+          ></b-form-input>
+          <!-- end Job  -->
+        </b-form-group>
         </div>
       </div>
-      <div class="row">
-        <!-- address -->
-        <div class="col-12 mb-3">
-          <label for="address">Address</label>
-          <input v-model="student.address_street" type="text" class="form-control" id="address" placeholder="1234 Main St"
-          required :readonly="!editMode?true: false">
-        </div>
+      <b-button
+        block type="submit"
+        variant="primary">
+        Modifier L'Étudiant
+      </b-button>
+    </b-form>
 
-        <!-- department -->
-        <div class="col-4 mb-3">
-          <label for="department">Department</label>
-          <input v-model="student.department" type="text" class="form-control" id="address" placeholder="Bir el djir"
-          required :readonly="!editMode?true: false">
-        </div>
-
-        <!-- city -->
-        <div class="col-4 mb-3">
-          <label for="city">City</label>
-          <select v-model="student.city" class="custom-select d-block" id="city"
-          required :disabled="!editMode?true: false">
-          <option value="oran">Oran</option>
-          </select>
-        </div>
-      </div>
-
-
-      <div class="row">
-        <!-- fileNumber -->
-        <div class="col-4 mb-3">
-          <label for="fileNumber">FileNumber</label>
-          <input v-model="student.file_number" type="text" class="form-control" id="fileNumber" placeholder="" required
-          :readonly="!editMode?true: false">
-        </div>
-        <!-- job -->
-        <div class="col-4 mb-3">
-          <label for="job">Job</label>
-          <input v-model="student.job" type="text" class="form-control" id="job" placeholder=""
-          required :readonly="!editMode?true: false">
-        </div>
-
-      </div>
-      <!-- button add student -->
-      <button @click.prevent="editStudent()"
-      class="btn btn-primary btn-lg btn-block"
-      type="submit" :disabled="!editMode?true: false">Edit Student</button>
-    </form>
   </div>
 </template>
 
 
 <script>
 import VueBootstrapDatetimepicker from 'vue-bootstrap-datetimepicker';
+import Header from './parts/Header';
 import moment from 'moment';
 
 export default {
   name: "studentDetails",
-  created: function(){
-    this.getStudent();
-  },
   components: {
-    VueBootstrapDatetimepicker
+    VueBootstrapDatetimepicker,
+    Header
+  },
+  mounted: function(){
+    this.getStudent();
+    this.resetMessagesAlert();
   },
   data: () => ({
+    ready: false,
     options:{
-      // format:"DD/MM/YYYY",
+      format:"DD-MM-YYYY",
       useCurrent: false
     },
-    editMode:false,
-    student:{},
-    birthday: null,
+    data: {},
     registredDate: null,
-    id: null
+    birthday: null,
+    studentUpdated: false,
+    alertVariant: "",
+    alertMessage: "",
+    errorGetStudent: null,
+    errorUpdate: null,
+    student:{},
+    errrrr: null,
+    id: null,
   }),
   methods:{
+    closeAlert: function(){
+      this.studentUpdated = false;
+      this.errorGetStudent = null;
+    },
+    resetMessagesAlert:function(){
+      this.alertVariant = "success";
+      this.alertMessage = "L'étudiant a été modifié";
+    },
+    getDataMultiLanguage:function(){
+      try {
+        let fn = JSON.parse(this.student.first_name);
+        this.student.first_name = fn.fr;
+        this.student.ar_first_name = fn.ar;
+      } catch (e) {
+        this.errrrr = e;
+        this.student.first_name = "";
+        this.student.ar_first_name = "";
+      }
+      try {
+        let ln = JSON.parse(this.student.last_name);
+        this.student.last_name = ln.fr;
+        this.student.ar_last_name = ln.ar;
+      } catch (e) {
+        this.errrrr = e;
+
+        this.student.last_name = "";
+        this.student.ar_last_name = "";
+      }
+      try {
+        let mn = JSON.parse(this.student.maiden_name);
+        this.student.maiden_name = mn.fr;
+        this.student.ar_maiden_name = mn.ar;
+      } catch (e) {
+        this.errrrr = e;
+
+        this.student.maiden_name = "";
+        this.student.ar_maiden_name = "";
+      }
+    },
     getStudent: function(){
       this.id = this.$route.params.id;
-      window.backend.Service.GetStudent(this.id, "").then(data=>{
-        this.student = data;
-      });
-      this.birthday = this.toMoment(this.student.birthday);
-      this.registredDate = this.toMoment(this.student.birthday);
-    },
-    switchEditMode: function(){
-      this.editMode = !this.editMode;
+      window.backend.Service.GetStudent(this.id, "").then(
+        data=>{
+          this.student = data;
+          this.getDataMultiLanguage();
+          this.registredDate = moment(this.student.registred_date).format();
+          this.birthday = moment(this.student.birthday).format();
+          this.ready = true;
+        },
+        err=>{
+          this.errorGetStudent = err;
+          this.alertVariant = "warning";
+          this.alertMessage = "Erreur du Server";
+          this.studentUpdated = true;
+        }
+      );
     },
     editStudent: function(){
-      window.backend.Service.UpdateStudent(this.student);
+      this.student.birthday = moment(this.birthday).format();
+      this.student.registred_date = moment(this.registredDate).format();
+      try {
+        this.student.first_name = JSON.stringify(
+          {"fr": this.student.first_name, "ar": this.student.ar_first_name}
+        );
+
+        this.student.last_name = JSON.stringify(
+          {"fr": this.student.last_name, "ar": this.student.ar_last_name}
+        );
+
+        this.student.maiden_name = JSON.stringify(
+          {"fr": this.student.maiden_name, "ar": this.student.ar_maiden_name}
+        );
+
+        // delete this.student["ar_first_name"];
+        // delete this.student["ar_last_name"];
+        // delete this.student["ar_maiden_name"];
+
+      } catch (e) {
+        this.studentUpdated = true;
+        this.alertVariant = "warning";
+        this.alertMessage = "Erreur L'étudiant n'a pas été modifié";
+      }
+      window.backend.Service.UpdateStudent(this.student).then(
+        data=>{
+          this.data = data;
+        },
+        err =>{
+          this.errorUpdate = err;
+        }
+      );if(this.errorUpdate != null){
+        this.alertVariant = "warning";
+        this.alertMessage = "Erreur L'étudiant n'a pas été modifié";
+      }
+      this.studentUpdated = true;
+      this.getDataMultiLanguage();
     },
-    toMoment:function(date){
-      return moment(date).format('DD MMMM YYYY');
+    getStudentNextExamName: function(){
+      switch (this.student.next_exam) {
+        case "Highway code":
+          return "Code";
+        case "Niche":
+          return "Créneau";
+        case "Circuit":
+          return "Circuit";
+      }
+    },
+    getStudentNextExamPourcent: function(){
+      switch (this.student.next_exam) {
+        case "Highway code":
+          return 1;
+        case "Niche":
+          return 2
+        case "Circuit":
+          return 3
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-.contentLeft{
-  border-right: 1px solid #333;
-}
 </style>

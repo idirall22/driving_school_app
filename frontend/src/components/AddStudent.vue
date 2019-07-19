@@ -1,180 +1,319 @@
 <template>
   <div id="studentDetails">
-    <div class="row">
-      <Header initTitle="Ajouter Un Étudiant"></Header>
+    <b-alert
+      v-model="studentCreated"
+      :variant="alertVariant"
+      dismissible
+      @dismissed="closeAlert()">
+      {{alertMessage}}
+    </b-alert>
 
-      <!-- Message  -->
-       <Message
-        v-on:close-alert="closeAlert"
-        :create.sync="studentCreated"
-        :errorCreate.sync="errorCreateStudent"
-        :subject="subjectMessage">
-      </Message>
+    <Header initTitle="Ajouter Un Étudiant"></Header>
 
-    </div>
+    <b-form @submit="addStudent">
+      <div class="row">
+          <div class="col">
+            <!-- First name  -->
+            <b-form-group
+              id="firstName-group"
+              label="Prénom:"
+              label-for="firstName">
 
-    <!-- Errors fields -->
-    <div v-if="errors.length > 0" class="col mb-5 mt-3 mr-3 alert alert-danger" role="alert">
-      <h4 class="alert-heading">there are some Errors!</h4>
-      <hr>
-        <p v-for="err in errors" :key="err">
-          Error with "{{err}}"</p>
-    </div>
+            <b-form-input
+              id="firstName"
+              v-model="firstName"
+              type="text"
+              placeholder="Prénom"
+              required
+            ></b-form-input>
+            </b-form-group>
+            <!-- end First name  -->
 
+            <!-- Last name  -->
+            <b-form-group
+              id="lastName-group"
+              label="Nom:"
+              label-for="lastName">
 
-    <!-- form -->
-      <form class="needs-validation" novalidate="">
-        <div class="row">
+              <b-form-input
+                id="lastName"
+                v-model="lastName"
+                type="text"
+                placeholder="Nom"
+                required
+              ></b-form-input>
+            </b-form-group>
+            <!-- end Last name  -->
 
-          <!-- first name -->
-          <div class="col-md-6 mb-3">
-            <label for="firstName">Prénom</label>
-            <input v-model="firstName" type="text" class="form-control"
-            id="firstName" placeholder="" value="" required >
+            <!-- Maiden name  -->
+            <b-form-group
+              id="maidenName-group"
+              label="Nom De Jeune Fille:"
+              label-for="maidenName">
+
+              <b-form-input
+                id="maidenName"
+                v-model="maidenName"
+                type="text"
+                placeholder= "Nom De Jeune Fille"
+                required
+              ></b-form-input>
+            </b-form-group>
+            <!-- end Maiden name  -->
+
           </div>
 
-          <!-- first name -->
-          <div class="col-md-6 mb-3">
-            <label class="d-flex justify-content-end" for="arfirstName">الإسم</label>
-            <input v-model="arFirstName"
-              dir="rtl" type="text" class="form-control"
-            id="arfirstName" placeholder="" value="" required >
+          <div class="col">
+            <!-- AraFirst name  -->
+            <b-form-group
+              id="firstName-group"
+              label=":الإسم"
+              label-for="firstName">
+
+              <b-form-input
+              id="firstName"
+                v-model="arFirstName"
+                type="text"
+                placeholder="الإسم"
+                required
+              ></b-form-input>
+            </b-form-group>
+            <!-- end First name  -->
+
+            <!-- Arabic Last name  -->
+            <b-form-group
+              id="lastName-group"
+              label=":اللقب"
+              label-for="lastName">
+
+              <b-form-input
+                id="lastName"
+                v-model="arLastName"
+                type="text"
+                placeholder="اللقب"
+                required
+              ></b-form-input>
+            </b-form-group>
+
+            <!-- end Last name  -->
+
+            <!-- Arabic Maiden name  -->
+            <b-form-group
+              id="maidenName-group"
+              label=":إسم العائلة قبل الزواج"
+              label-for="maidenName">
+
+              <b-form-input
+                direction:RTL
+                id="maidenName"
+                v-model="arMaidenName"
+                type="text"
+                placeholder="إسم العائلة قبل الزواج"
+                required
+              ></b-form-input>
+            </b-form-group>
+
+            <!-- end Maiden name  -->
+
           </div>
-
-          <!-- last name -->
-          <div class="col-md-6 mb-3">
-            <label for="lastName">Nom De Famille</label>
-            <input v-model="lastName" type="text" class="form-control"
-            id="lastName" placeholder="" value="" required >
-          </div>
-
-          <!-- last name -->
-          <div class="col-md-6 mb-3">
-            <label class="d-flex justify-content-end" for="lastName">اللقب</label>
-            <input v-model="arlastName" type="text" class="form-control"
-            id="lastName" placeholder="" value="" required >
-          </div>
-        </div>
-
-        <div class="row">
-
-          <!-- maiden name -->
-          <div class="col mb-3">
-            <label for="address">Nom De Jeune Fille</label>
-            <input v-model="maidenName" type="text" class="form-control" id="maidenName"
-            placeholder="" required >
-          </div>
-
-          <!-- maiden name -->
-          <div class="col mb-3">
-            <label class="d-flex justify-content-end" for="address">إسم العائلة قبل الزواج</label>
-            <input v-model="maidenName" type="text" class="form-control" id="maidenName"
-            placeholder="" required >
-          </div>
-
-        </div>
-
-        <div class="row">
-
-          <!-- birthday -->
-          <div class="col-4 mb-3">
-            <label for="birthday">Date de Naissance</label>
-            <vue-bootstrap-datetimepicker v-model="birthday" :config="options"
-            required></vue-bootstrap-datetimepicker>
-          </div>
-
-          <!-- birth city -->
-          <div class="col-4 mb-3">
-            <label for="birthCity">Wilaya de Naissance</label>
-            <input v-model="birthCity" type="text" class="form-control"
-              id="birthCity" placeholder="Oran" required >
-          </div>
-
-          <!-- Country -->
-          <div class="col mb-3">
-            <label for="country">Pays De Naissance</label>
-            <input v-model="country" type="text" class="form-control"
-            id="country" placeholder="Algerie" required >
-          </div>
-
-        <!-- gender -->
-        <div class="col-4 mb-3">
-          <label for="gender">Sexe</label>
-          <select v-model="gender" class="custom-select d-block w-100"
-            id="gender" required>
-
-            <option value="man">Man</option>
-            <option value="woman">Woman</option>
-          </select>
-        </div>
-
-        <!-- registred date -->
-        <div class="col-4 mb-3">
-          <label for="registredDate">Date d'Inscription</label>
-          <vue-bootstrap-datetimepicker v-model="registredDate" :config="options"
-          ></vue-bootstrap-datetimepicker>
-        </div>
-
-        <!-- phone number -->
-        <div class="col mb-3">
-          <label for="address">Numero De Telephone</label>
-          <input v-model="phoneNumber" type="text" class="form-control"
-          id="address" placeholder="XX-XX-XX-XX-XX" required >
-        </div>
-
       </div>
 
       <div class="row">
-        <!-- address -->
-        <div class="col-12 mb-3">
-          <label for="address">Adresse</label>
-          <input v-model="addressStreet" type="text" class="form-control" id="address" placeholder="1234 Main St"
-            required >
-        </div>
+        <div class="col">
+          <!-- Birthday -->
+          <b-form-group
+            id="birthday-group"
+            label="Date de Naissance:"
+            label-for="birthday">
 
-        <!-- department -->
-        <div class="col-4 mb-3">
-          <label for="department">Daira</label>
-          <input v-model="department" type="text" class="form-control" id="address" placeholder="Bir el djir"
-            required >
-        </div>
-
-        <!-- city -->
-        <div class="col-4 mb-3">
-          <label for="city">Wilaya</label>
-          <input v-model="city" type="text" class="form-control" id="city"
-            placeholder="Oran" required >
-        </div>
-      </div>
-
-      <div class="row">
-
-        <!-- fileNumber -->
-        <div class="col-4 mb-3">
-          <label for="fileNumber">Numero De Dossier</label>
-          <input v-model="fileNumber" type="text" class="form-control" id="fileNumber" placeholder="" required
+            <vue-bootstrap-datetimepicker
+              v-model="birthday"
+              :config="options"
             >
+            </vue-bootstrap-datetimepicker>
+          </b-form-group>
+          <!-- end Birthday -->
         </div>
+        <div class="col">
+          <!-- Birth Country  -->
+          <b-form-group
+            id="country-group"
+            label="Pays De Naissance:"
+            label-for="country">
 
-        <!-- job -->
-        <div class="col-4 mb-3">
-          <label for="job">Travaille</label>
-          <input v-model="job" type="text" class="form-control" id="job" placeholder=""
-            required >
+            <b-form-input
+              id="country"
+              v-model="birthCountry"
+              type="text"
+              placeholder="Algerie"
+              required
+            ></b-form-input>
+          </b-form-group>
+          <!-- end Birth Country  -->
         </div>
+        <div class="col">
 
+                <!-- Gender -->
+                <b-form-group
+                  id="gender-group"
+                  label="Sexe:"
+                  label-for="gender">
+
+                  <b-form-select
+                    class="mb-2 mr-sm-2 mb-sm-0"
+                    v-model="gender"
+                    :options="[
+                      { 'value': 'homme', 'text': 'Homme'},
+                      { 'value': 'femme', 'text': 'Femme'},
+                    ]"
+                    id="gender"
+                  >
+                  <template slot="first">
+                    <option :value="null" disabled>Choisire ...</option>
+                  </template>
+                  </b-form-select>
+                </b-form-group>
+                <!-- end Gender -->
+        </div>
       </div>
-      <!-- button add student -->
-      <button @click.prevent="addStudent()"
-        class="btn btn-primary btn-lg btn-block" type="submit">Ajouter L'Étudiant</button>
-    </form>
+
+      <div class="row">
+        <div class="col">
+          <!-- Registred Date -->
+          <b-form-group
+            id="registredDate-group"
+            label="Date d'Inscription:"
+            label-for="registredDate">
+
+            <vue-bootstrap-datetimepicker
+              v-model="registredDate"
+              :config="options"
+            >
+            </vue-bootstrap-datetimepicker>
+          </b-form-group>
+          <!-- end Registred Date -->
+        </div>
+
+        <div class="col">
+          <!-- Phone Number  -->
+          <b-form-group
+            id="phoneNumber-group"
+            label="Numero De Telephone:"
+            label-for="phoneNumber">
+
+            <b-form-input
+              id="phoneNumber"
+              v-model="phoneNumber"
+              type="text"
+              placeholder="01-23-45-67-89"
+              required
+            ></b-form-input>
+          </b-form-group>
+          <!-- end Phone Number  -->
+        </div>
+      </div>
+
+      <!-- Address  -->
+      <b-form-group
+        id="address-group"
+        label="Adresse:"
+        label-for="address">
+
+        <b-form-input
+          id="address"
+          v-model="addressStreet"
+          type="text"
+          placeholder="adresse"
+          required
+        ></b-form-input>
+      </b-form-group>
+      <!-- end Address  -->
+
+      <div class="row">
+        <div class="col">
+          <!-- Department  -->
+          <b-form-group
+            id="department-group"
+            label="Daira:"
+            label-for="department">
+
+            <b-form-input
+              id="department"
+              v-model="department"
+              type="text"
+              placeholder="Bir el djir"
+              required
+            ></b-form-input>
+          </b-form-group>
+          <!-- end Department  -->
+        </div>
+        <div class="col">
+          <!-- City  -->
+          <b-form-group
+            id="city-group"
+            label="Wilaya:"
+            label-for="city">
+
+            <b-form-input
+              id="city"
+              v-model="city"
+              type="text"
+              placeholder="Oran"
+              required
+            ></b-form-input>
+          </b-form-group>
+          <!-- end City -->
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <!-- File Number -->
+          <b-form-group
+            id="fileNumber-group"
+            label="Numero De Dossier:"
+            label-for="fileNumber">
+
+            <b-form-input
+              id="fileNumber"
+              v-model="fileNumber"
+              type="text"
+              placeholder="1234"
+              required
+            ></b-form-input>
+          </b-form-group>
+          <!-- end File Number -->
+        </div>
+        <div class="col">
+          <!-- job -->
+          <b-form-group
+            id="job-group"
+            label="Travaille:"
+            label-for="job">
+
+            <b-form-input
+              id="job"
+              v-model="job"
+              type="text"
+              placeholder=""
+              required
+          ></b-form-input>
+          <!-- end Job  -->
+        </b-form-group>
+        </div>
+      </div>
+      <b-button
+        block type="submit"
+        variant="primary">
+        Ajouter L'Étudiant
+      </b-button>
+    </b-form>
   </div>
 </template>
 
 <script>
 import VueBootstrapDatetimepicker from 'vue-bootstrap-datetimepicker';
 import Header from './parts/Header';
-import Message from './parts/Message';
 import moment from 'moment';
 
 export default {
@@ -182,27 +321,35 @@ export default {
   components: {
     VueBootstrapDatetimepicker,
     Header,
-    Message
+  },
+  created() {
+    //do something after creating vue instance
+    this.resetMessagesAlert();
   },
   data: () => ({
     options:{
       format:"YYYY-MM-DD",
       useCurrent: false
     },
-    arabic:"",
-    arFirstName:"",
-    subjectMessage:"Student Created",
+    alertMessage:"",
+    alertVariant:"",
+
     student:{},
 
-    fileNumber: "",
     firstName: "",
+    arFirstName: "",
     lastName: "",
+    arLastName: "",
     maidenName: "",
-    phoneNumber: "",
+    arMaidenName: "",
+
     birthday: "",
-    birthCity: "",
-    job: "",
+    birthCountry: "",
     gender: "",
+
+    phoneNumber: "",
+    fileNumber: "",
+    job: "",
     country: "",
     city: "",
     department: "",
@@ -211,86 +358,56 @@ export default {
 
     studentCreated: false,
     errorCreateStudent: null,
-    errors: [],
   }),
   methods:{
+    // Rset Alert Message
+    resetMessagesAlert:function(){
+      this.alertVariant = "success";
+      this.alertMessage = "L'étudiant a été crée";
+    },
+
     addStudent:function(){
-      this.errors = []
-      if (this.firstName == ""){
-        this.errors.push("First Name")
+      if(this.errorCreateStudent != null){
+        this.resetMessagesAlert();
       }
-      if (this.lastName == ""){
-        this.errors.push("Last Name")
+      if(this.maidenName == ""){
+        this.maidenName = "None";
+        this.arMaidenName = "None";
       }
-      if (this.phoneNumber == ""){
-        this.errors.push("Phone Number")
+      this.student = {
+        "first_name": JSON.stringify({"fr":this.firstName, "ar":this.arFirstName}),
+        "last_name": JSON.stringify({"fr":this.lastName, "ar":this.arLastName}),
+        "maiden_name": JSON.stringify({"fr":this.maidenName, "ar":this.arMaidenName}),
+        "phone_number": this.phoneNumber,
+        "birthday": moment(this.birthday).format(),
+        "birth_city": this.birthCountry,
+        "job": this.job,
+        "city": this.city,
+        "file_number": this.fileNumber,
+        "gender": this.gender,
+        "country": this.country,
+        "address_street": this.addressStreet,
+        "department": this.department,
+        "registred_date": moment(this.registredDate).format(),
       }
-      if (this.birthday == ""){
-        this.errors.push("Birthday")
-      }
-      if (this.birthCity == ""){
-        this.errors.push("Birth City")
-      }
-      if (this.country == ""){
-        this.errors.push("Country")
-      }
-      if (this.job == ""){
-        this.errors.push("Job")
-      }
-      if (this.fileNumber == ""){
-        this.errors.push("File Number")
-      }
-      if (this.city == ""){
-        this.errors.push("City")
-      }
-      if (this.department == ""){
-        this.errors.push("Department")
-      }
-      if (this.addressStreet == ""){
-        this.errors.push("Address")
-      }
-      if (this.registredDate == ""){
-        this.errors.push("Registred Date")
-      }
-      if(this.errors.length == 0){
-        if(this.maidenName == ""){
-          this.maidenName = "None";
+        window.backend.Service.CreateStudent(this.student).
+        then(
+          data=>{this.data = data;},
+          err=>{this.errorCreateStudent = err;},
+        )
+        if(this.errorCreateStudent != null){
+          this.alertMessage = "Il y'a une erreur, l'étudiant n'a pas été crée";
+          this.alertVariant = "warning";
         }
-        this.student = {
-          "first_name": this.firstName,
-          "last_name": this.lastName,
-          "maiden_name": this.maidenName,
-          "phone_number": this.phoneNumber,
-          "birthday": moment(this.birthday).format(),
-          "birth_city": this.birthCity,
-          "job": this.job,
-          "city": this.city,
-          "file_number": this.fileNumber,
-          "gender": this.gender,
-          "country": this.country,
-          "address_street": this.addressStreet,
-          "department": this.department,
-          "registred_date": moment(this.registredDate).format(),
-        }
-          window.backend.Service.CreateStudent(this.student).
-          then(
-            data=>{this.data = data;},
-            err=>{this.errorCreateStudent = err;},
-          )
-          if(this.errorCreateStudent != null){
-            this.studentCreated = false;
-          }else{
-            this.studentCreated = true;
-        }
-      }
+        this.studentCreated = true;
     },
     closeAlert:function(){
       this.studentCreated = false;
       this.errorCreateStudent = null;
+      this.resetMessagesAlert();
     },
   }
 }
-"أ"
 </script>
 <style scoped>
 .ar{
