@@ -1,14 +1,14 @@
 <template>
   <div id="examLists">
-    <Header initTitle="All Exams Lists"></Header>
+    <Header initTitle="Les Listes D'éxamen"></Header>
     <div class="table-responsive">
       <table class="table table-striped table-sm">
         <thead>
           <tr>
             <th class="align-middle text-center">N°</th>
-            <th class="align-middle text-center">Examiner</th>
-            <th class="align-middle text-center">Exam Date</th>
-            <th class="align-middle text-center">Details</th>
+            <th class="align-middle text-center">L'éxaminateur</th>
+            <th class="align-middle text-center">Date d'éxamen</th>
+            <th class="align-middle text-center">Détails</th>
           </tr>
 
         </thead>
@@ -16,15 +16,17 @@
           <tr v-for="exam in examLists" :key="exam.id">
             <td class="align-middle text-center">{{exam.id}}</td>
             <td class="align-middle text-center">{{exam.examiner}}</td>
-            <td class="align-middle text-center">{{exam.date_exam | moment}}</td>
-            <td class="align-middle text-center"><router-link :to="{ name: 'examListDetails',
+            <td class="align-middle text-center">{{exam.date_exam | moment2}}</td>
+            <td class="align-middle text-center">
+              <router-link :to="{ name: 'examListDetails',
                 params: { id: exam.id}}"
-              class="btn btn-outline-primary">infos</router-link></td>
+                class="btn btn-outline-primary">Détails</router-link>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div class="d-flex justify-content-center m-5">
+    <div v-if="pages>1" class="d-flex justify-content-center m-5">
       <v-pagination
         v-model="currentPage"
         :page-count="pages"
@@ -64,10 +66,10 @@ export default {
         button: 'page-link'
     },
     paginationAnchorTexts: {
-        first: 'First',
-        prev: 'Previous',
-        next: 'Next',
-        last: 'Last'
+        first: '<<',
+        prev: '<',
+        next: '>',
+        last: '>>'
     }
   }),
   watch:{

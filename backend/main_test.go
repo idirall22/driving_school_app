@@ -12,6 +12,7 @@ func TestMain(t *testing.T) {
 	t.Run("updateStudents", testUpdateStudent)
 
 	t.Run("createExamList", testCreateExamList)
+	t.Run("archiveExamList", testArchiveExamList)
 	t.Run("getExamList", testGetExamList)
 	t.Run("getExamLists", testGetExamLists)
 	t.Run("updateExamList", testUpdateExamList)

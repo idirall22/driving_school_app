@@ -24,7 +24,6 @@ func testCreateExamList(t *testing.T) {
 
 	examDate := time.Now().Format(timeFormat)
 	examiner := "examiner name"
-
 	examList, errEL := MainService.CreateExamList(
 		examDate, examiner, studentsMap)
 
@@ -35,6 +34,21 @@ func testCreateExamList(t *testing.T) {
 	if examList != nil {
 		if examList.ID != 1 {
 			t.Error("There is an error when exam list was created")
+		}
+	}
+}
+
+// Test to archive an examList
+func testArchiveExamList(t *testing.T) {
+	if err := MainService.ArchiveExamList(1, true); err != nil {
+		t.Error(err)
+	} else {
+		examList, err := MainService.GetExamList(1)
+		if err != nil {
+			t.Error("There is an error, to get exam list")
+		}
+		if examList.Archived != true {
+			t.Error("There is an error, archived need to be true")
 		}
 	}
 }

@@ -1,16 +1,16 @@
 <template>
 <div v-if="loaded" id="listStudents">
-  <Header initTitle="Students List"></Header>
+  <Header initTitle="Liste d'étudiants"></Header>
   <div class="table-responsive">
     <table class="table table-striped table-sm">
       <thead>
         <tr>
           <th class="align-middle text-center">N°</th>
-          <th class="align-middle text-center">First Name</th>
-          <th class="align-middle text-center">Last Name</th>
-          <th class="align-middle text-center">Registred</th>
-          <th class="align-middle text-center">Exam</th>
-          <th class="align-middle text-center">Details</th>
+          <th class="align-middle text-center">Prénom</th>
+          <th class="align-middle text-center">Nom</th>
+          <th class="align-middle text-center">Date d'Inscription</th>
+          <th class="align-middle text-center">Examen</th>
+          <th class="align-middle text-center">Détails</th>
         </tr>
 
       </thead>
@@ -41,7 +41,7 @@
 <script>
 import vPagination from 'vue-plain-pagination'
 import Header from './parts/Header'
-import moment from 'moment';
+// import moment from 'moment';
 
 export default {
   name: "listStudents",

@@ -24,7 +24,7 @@ type MultiLanguageField struct {
 //Student model
 type Student struct {
 	ID            uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt     time.Time  `json:"created_at,omitempty"`
+	CreatedAt     time.Time  `sql:"DEFAULT:current_timestamp" json:"created_at,omitempty"`
 	UpdatedAt     time.Time  `json:"updated_at,omitempty"`
 	DeletedAt     *time.Time `sql:"index"`
 	FileNumber    string     `gorm:"unique" json:"file_number,omitempty"`
@@ -44,7 +44,7 @@ type Student struct {
 	Image         string     `gorm:"default:'imageURL'" json:"image,omitempty"`
 	NextExam      string     `gorm:"default:'Highway code'" json:"next_exam,omitempty"`
 	LastExamDate  *time.Time `gorm:"index:last_exam_date" json:"last_exam_date,omitempty"`
-	Archived      bool       `json:"archived,omitempty"`
+	Archived      bool       `json:"archived"`
 }
 
 // TableName :Database table name
@@ -55,7 +55,7 @@ func (s Student) TableName() string {
 // Exam an exam passed by a student
 type Exam struct {
 	ID         uint       `gorm:"unique_index" json:"id,omitempty"`
-	CreatedAt  time.Time  `json:"created_at,omitempty"`
+	CreatedAt  time.Time  `sql:"DEFAULT:current_timestamp" json:"created_at,omitempty"`
 	UpdatedAt  time.Time  `json:"updated_at,omitempty"`
 	DeletedAt  *time.Time `sql:"index"`
 	ExamName   string     `json:"exam,omitempty"`
@@ -79,8 +79,8 @@ type ExamList struct {
 	DeletedAt     *time.Time `sql:"index"`
 	DateExam      time.Time  `json:"date_exam,omitempty"`
 	Examiner      string     `json:"examiner,omitempty"`
+	Archived      bool       `json:"archived"`
 	StudentsExams []*Exam    `json:"students_exams,omitempty"`
-	Archived      bool       `json:"archived,omitempty"`
 }
 
 // TableName :Database table name

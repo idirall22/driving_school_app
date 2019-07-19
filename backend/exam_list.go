@@ -38,6 +38,7 @@ func (s *Service) CreateExamList(date, examiner string,
 	examList := &ExamList{
 		DateExam: dateTime,
 		Examiner: examiner,
+		Archived: false,
 	}
 
 	if err := MainService.db.Create(&examList).Error; err != nil {
@@ -187,4 +188,10 @@ func (s *Service) DeleteExamList(id uint) error {
 		Unscoped().Delete(&examList.StudentsExams)
 	err := tx.Commit().Error
 	return err
+}
+
+// ArchiveExamList archive or an archive examList
+func (s *Service) ArchiveExamList(id uint, archived bool) error {
+	return MainService.db.Model(&ExamList{}).Where("id=?", id).
+		UpdateColumn("archived", archived).Error
 }
