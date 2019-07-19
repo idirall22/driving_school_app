@@ -6,18 +6,25 @@ import (
 )
 
 // GetStudent return a single student by provaiding id or lastName
-func (s *Service) GetStudent(studentID uint, lastName string) (*Student, error) {
-	student := &Student{}
+func (s *Service) GetStudent(studentID uint,
+	lastName string) (*GetStudentInfos, error) {
+	getStudentInfos := &GetStudentInfos{
+		Student: &Student{},
+		Exams:   []*Exam{},
+	}
 
 	if studentID != 0 && lastName != "" {
 		lastName = ""
 	}
 
-	if err := MainService.db.Find(&student,
-		"id=? OR last_name=?", studentID, lastName).Error; err != nil {
+	tx := MainService.db.Begin()
+	tx.Find(&getStudentInfos.Student, "id=? OR last_name=?", studentID, lastName)
+	if err := tx.Find(&getStudentInfos.Exams, "id=?", studentID).
+		Error; err != nil {
 		return nil, err
 	}
-	return student, nil
+	tx.Commit()
+	return getStudentInfos, nil
 }
 
 // StudentsListOut model

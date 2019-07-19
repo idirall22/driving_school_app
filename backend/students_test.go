@@ -43,11 +43,11 @@ var dummyStudent = &Student{
 
 // Test GetStudent
 func testGetStudent(t *testing.T) {
-	student, err := MainService.GetStudent(1, "")
+	getStudentInfos, err := MainService.GetStudent(1, "")
 	if err != nil {
 		fmt.Println(err)
 	}
-	if student.ID != 1 {
+	if getStudentInfos.Student.ID != 1 {
 		t.Error("There is an error the ids does not match")
 	}
 }
@@ -112,13 +112,13 @@ func testUpdateStudent(t *testing.T) {
 	if err != nil {
 		t.Error("There is an error the student was not updated")
 	}
-	student, err := MainService.GetStudent(1, "")
+	getStudentInfos, err := MainService.GetStudent(1, "")
 	if err != nil {
 		t.Error("There is an error can not get student")
 	}
 
-	if student != nil {
-		if student.FirstName != m["first_name"] && id != 1 {
+	if getStudentInfos.Student != nil {
+		if getStudentInfos.Student.FirstName != m["first_name"] && id != 1 {
 			t.Error("There is an error with the student who was updated")
 		}
 	}

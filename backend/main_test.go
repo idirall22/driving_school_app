@@ -7,7 +7,6 @@ func TestMain(t *testing.T) {
 	t.Run("createDatabaseFile", testCreateDatabaseFile)
 
 	t.Run("createStudent", testCreateStudent)
-	t.Run("getStudent", testGetStudent)
 	t.Run("getStudents", testGetStudents)
 	t.Run("updateStudents", testUpdateStudent)
 
@@ -17,6 +16,7 @@ func TestMain(t *testing.T) {
 	t.Run("getExamLists", testGetExamLists)
 	t.Run("updateExamList", testUpdateExamList)
 
+	t.Run("getStudent", testGetStudent)
 	t.Run("deleteExamList", testDeleteExamList)
 	t.Run("deleteStudents", testDeleteStudent)
 

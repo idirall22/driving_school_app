@@ -15,6 +15,12 @@ var (
 	ExamThree = "Circuit"
 )
 
+// GetStudentInfos model returned when request single student infos
+type GetStudentInfos struct {
+	Student *Student `json:"student"`
+	Exams   []*Exam  `json:"exams"`
+}
+
 // MultiLanguageField model
 type MultiLanguageField struct {
 	FR string `json:"fr"`
