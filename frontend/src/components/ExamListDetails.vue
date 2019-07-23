@@ -109,18 +109,27 @@
            </tr>
          </thead>
          <tbody>
-           <tr v-for="(exam, index) in examList.students_exams" :key="exam.id">
+           <tr v-for="(exam, index) in examList.examListInfos.students_exams"
+              :key="exam.student.studentInfos.id">
+
              <td class="align-middle text-center">{{index+1}}</td>
-             <td class="align-middle text-center">{{exam.student.file_number}}</td>
-             <td class="align-middle text-center">{{exam.student.first_name | capitalize}} {{exam.student.last_name | capitalize}}</td>
-             <td class="align-middle text-center">{{exam.student.birthday | moment2}}</td>
+             <td class="align-middle text-center">
+               {{exam.student.studentInfos.file_number}}
+             </td>
+             <td class="align-middle text-center">
+               {{exam.student.studentInfos.last_name_fr | capitalize}}
+               {{exam.student.studentInfos.first_name_fr | capitalize}}
+             </td>
+             <td class="align-middle text-center">
+               {{exam.student.studentInfos.birthday}}
+             </td>
              <td class="align-middle text-center">B</td>
-             <td class="align-middle text-center">{{exam.exam}}</td>
+             <td class="align-middle text-center">{{exam.student.getStudentNextExamName()}}</td>
              <td class="align-middle text-center">
                <input v-model="exam.status" type="checkbox">
              </td>
              <td class="align-middle text-center">
-               <button @click.prevent="removeStudent(exam)"
+               <button @click.prevent="removeStudent(index)"
                  type="button" class="form-control close"
                  data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -133,8 +142,8 @@
                {{student.studentInfos.file_number}}
              </td>
              <td class="align-middle text-center">
-               {{student.studentInfos.first_name_fr | capitalize}}
                {{student.studentInfos.last_name_fr | capitalize}}
+               {{student.studentInfos.first_name_fr | capitalize}}
              </td>
              <td class="align-middle text-center">
                {{student.studentInfos.birthday}}
@@ -189,18 +198,19 @@ export default {
 
     errorDelete: null,
     errorArchive: null,
-    examListUpdated: false,
     errorUpdateExamList: null,
-
     errorGetExamList: null,
+
+    examListUpdated: false,
+    found: false,
+    loaded: false,
+
     id: 0,
     examList: {},
     studentLastName: "",
-    found: false,
-    loaded: false,
-    examDate: null,
     students: [],
     studentsFound: [],
+
     options:{
       format:"DD-MM-YYYY",
       useCurrent: false
@@ -215,6 +225,15 @@ export default {
       window.backend.Service.GetExamList(this.id)
       .then(
         data=>{
+          if("students_exams" in data){
+            if(data.students_exams.length > 0){
+              for (var i = 0; i < data.students_exams.length; i++) {
+                let std = new Student(data.students_exams[i].student, null);
+                data.students_exams[i].student = std;
+              }
+            }
+          }
+          // data.students_exams = students;
           this.examList = new ExamList(data);
           this.loaded = true;
         },
@@ -251,6 +270,9 @@ export default {
         this.studentsFound = [];
         this.found = false;
       }
+    },
+    removeStudent: function(index){
+      this.examList.examListInfos.students_exams.splice(index, 1);
     },
     checkIfAlreadyAdded: function(studentID){
       for (var i = 0; i < this.students.length; i++) {
@@ -326,12 +348,19 @@ export default {
       // Update Exam list
       this.examList.updateExamList();
 
+      let outStudentsList = []
+      for (var i = 0; i < this.students.length; i++) {
+        this.students[i].outStudent();
+        outStudentsList.push(this.students[i].studentInfos);
+      }
+      this.students = [];
+
       window.backend.Service.UpdateExamList(
         this.examList.examListInfos.id,
         this.examList.examListInfos.date_exam,
         this.examList.examListInfos.examiner,
         this.examList.examListInfos.students_exams,
-        this.students,
+        outStudentsList,
       ).then(
         data=>{this.data= data},
         err=>{this.errorUpdateExamList = err},
@@ -350,5 +379,6 @@ export default {
   }
 }
 </script>
+
 <style scoped>
 </style>

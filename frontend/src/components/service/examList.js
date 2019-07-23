@@ -4,6 +4,7 @@ import moment from 'moment';
 
 const DATE_FORMAT = "DD-MM-YYYY";
 
+
 export default class ExamList{
 
   EXAM_LIST_CREATED_MESSAGE = "La liste d'éxamen a été crée"
@@ -31,11 +32,11 @@ export default class ExamList{
   // return false if student is not in students_exams list
   checkIfStudentInExamList(studentID){
     if(this.examListInfos.students_exams.length > 0){
-      this.examListInfos.students_exams.forEach(function(std, index){
-        if(std.studentInfos.id == studentID){
-          return [true, index];
+      for (var i = 0; i < this.examListInfos.students_exams.length; i++) {
+        if(this.examListInfos.students_exams[i].id == studentID){
+          return [true, i];
         }
-      });
+      }
     }
     return [false, -1]
   }

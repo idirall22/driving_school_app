@@ -1,5 +1,6 @@
 <template>
   <div id="addExamList">
+
     <div class="d-flex justify-content-end">
       <b-alert
         v-model="examListCreated"
@@ -10,9 +11,8 @@
       </b-alert>
     </div>
     <!-- title -->
-    <div class="row">
-      <Header initTitle="Ajouter une Liste D'Examen"></Header>
-    </div>
+    <Header initTitle="Ajouter une Liste D'Examen"></Header>
+
     <b-form @submit="onSubmit">
 
       <!-- Exam date -->
@@ -42,7 +42,7 @@
       <div v-if="found">
         <div class="col-4 mt-3 p-0">
           <ul class="list-group p-0 m-0">
-            <li v-for="student in studentsFound" :key="student.id"
+            <li v-for="student in studentsFound" :key="student.studentInfos.id"
               class="list-group-item d-flex justify-content-between align-items-center">
               <p class="p-0 m-0">
                 {{student.studentInfos.last_name_fr | capitalize}}
@@ -88,7 +88,7 @@
               </td>
               <td class="align-middle text-center">B</td>
               <td class="align-middle text-center">
-                {{student.studentInfos.next_exam}}</td>
+                {{student.getStudentNextExamName()}}</td>
               <td>
                 <button @click.prevent="deleteStudent(index)"
                   type="button" class="form-control close"
@@ -128,15 +128,15 @@ export default {
     studentsFound:[],
     students: [],
     options:{
-      format:"YYYY-MM-DD",
+      format:"DD-MM-YYYY",
       useCurrent: false
     },
   }),
   methods:{
 
     // Delete student from exam list
-    deleteStudent: function(studentID){
-      this.students.splice(studentID, 1)
+    deleteStudent: function(index){
+      this.students.splice(index, 1)
     },
     searchStudent:function(){
       //Check if student name length is greather then 2
@@ -145,6 +145,7 @@ export default {
           this.studentLastName, "", 10, 0)
           .then(
             data=>{
+              // Convert data to student object
               for (var i = 0; i < data["students"].length; i++) {
                 let student = new Student(data["students"][i], null);
                 this.studentsFound.push(student)
@@ -160,48 +161,45 @@ export default {
 
       if(this.students.length == 0){
         // Check if students is empty if yes add student directly
-
         this.students.push(student);
-        this.studentFound = [];
-        this.found = false;
-        this.studentLastName="";
-
       }else{
         // else check if the student was not already added befor
         // add the student
-
         for (var i = 0; i < this.students.length; i++) {
-          if(student.id !=
-            this.students[i].id &&
-            i+1 == this.students.length){
-
+          if(student.id != this.students[i].id && i+1 == this.students.length){
             this.students.push(student);
-            this.studentFound = [];
-            this.found = false;
-            this.studentLastName="";
           }
         }
       }
+      this.studentFound = [];
+      this.found = false;
+      this.studentLastName="";
     },
     closeAlert: function(){
       this.errorCreateExamList = null;
       this.examListCreated =  false;
-      this.alertVariant = "success";
-      this.alertMessage = "La liste d'examen a été crée.";
     },
     onSubmit: function(){
+      let outStudents = [];
+      if(this.students.length > 0){
+        for (var i = 0; i < this.students.length; i++) {
+          this.students[i].outStudent();
+          outStudents.push(this.students[i].studentInfos);
+        }
+      }
       window.backend.Service.CreateExamList(
-        moment(this.examDate).format(),
-        this.examinerName,
-        this.students)
-
+        moment(this.examDate, "DD-MM-YYYY").format(),
+          this.examinerName, outStudents)
         .then(
           data=>{this.data = data},
           err=>{this.errorCreateExamList= err}
         )
       if(this.errorCreateExamList != null){
         this.alertVariant = "warning";
-        this.alertMessage = "Erreur lors de la création de la liste d'examen"
+        this.alertMessage ="La liste d'éxamen n'a pas été crée";
+      }else{
+        this.alertVariant = "success";
+        this.alertMessage = "La liste d'éxamen a été crée";
       }
       this.examListCreated = true;
     }

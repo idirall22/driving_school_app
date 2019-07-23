@@ -65,9 +65,8 @@ export default class Student{
     this.parseMaidenName();
     this.parseStudentTimeInfos();
   }
-
   // Delete all parsed languages key
-  updateStudent(){
+  outStudent(){
     if("first_name_fr" in this.studentInfos){
       this.studentInfos.first_name = "";
       this.studentInfos.first_name = JSON.stringify(

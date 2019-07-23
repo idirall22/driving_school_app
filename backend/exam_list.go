@@ -14,13 +14,17 @@ func (s *Service) CreateExamList(date, examiner string,
 
 	// Marshal an unmarshal the list interface into a list of students
 	students := []*Student{}
-	data, err := json.Marshal(studentsList)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	if err := json.Unmarshal(data, &students); err != nil {
-		return nil, err
+	// Check if length > 0
+	if len(studentsList) > 0 {
+		data, err := json.Marshal(studentsList)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if err := json.Unmarshal(data, &students); err != nil {
+			return nil, err
+		}
 	}
 
 	// Chek if there is a name for examiner
@@ -45,7 +49,8 @@ func (s *Service) CreateExamList(date, examiner string,
 		return nil, err
 	}
 
-	query := `INSERT INTO exams (
+	if len(students) > 0 {
+		query := `INSERT INTO exams (
 			exam_name,
 			date_exam,
 			status,
@@ -55,20 +60,20 @@ func (s *Service) CreateExamList(date, examiner string,
 				?,?,?,?,?
 				);`
 
-	tx := MainService.db.Begin()
-
-	for i := 0; i < len(students); i++ {
-		if err := tx.Exec(query,
-			students[i].NextExam,
-			examList.DateExam,
-			false,
-			students[i].ID,
-			examList.ID,
-		).Error; err != nil {
-			return nil, err
+		tx := MainService.db.Begin()
+		for i := 0; i < len(students); i++ {
+			if err := tx.Exec(query,
+				students[i].NextExam,
+				examList.DateExam,
+				false,
+				students[i].ID,
+				examList.ID,
+			).Error; err != nil {
+				return nil, err
+			}
 		}
+		tx.Commit()
 	}
-	tx.Commit()
 
 	return examList, nil
 }

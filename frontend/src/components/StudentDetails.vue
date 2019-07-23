@@ -381,7 +381,7 @@ export default {
       );
     },
     updateStudent: function(){
-      this.student.updateStudent();
+      this.student.outStudent();
 
       window.backend.Service.UpdateStudent(
         this.student.studentInfos)
