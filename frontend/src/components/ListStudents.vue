@@ -15,14 +15,14 @@
 
       </thead>
       <tbody>
-        <tr v-for="student in students" :key="student.key">
-          <td class="align-middle text-center">{{student.file_number}}</td>
-          <td class="align-middle text-center">{{student.last_name | capitalize}}</td>
-          <td class="align-middle text-center">{{student.first_name | capitalize}}</td>
-          <td class="align-middle text-center">{{student.registred_date | moment2}}</td>
-          <td class="align-middle text-center">{{getStudentNextExamName(student)}}</td>
+        <tr v-for="student in students" :key="student.studentInfos.id">
+          <td class="align-middle text-center">{{student.studentInfos.file_number}}</td>
+          <td class="align-middle text-center">{{student.studentInfos.last_name_fr | capitalize}}</td>
+          <td class="align-middle text-center">{{student.studentInfos.first_name_fr | capitalize}}</td>
+          <td class="align-middle text-center">{{student.studentInfos.registred_date}}</td>
+          <td class="align-middle text-center">code</td>
           <td class="align-middle text-center"><router-link class= "btn btn-danger" :to="{ name: 'studentDetails',
-          params: { id: student.id}}">infos</router-link></td>
+          params: { id: student.studentInfos.id}}">infos</router-link></td>
         </tr>
       </tbody>
     </table>
@@ -40,6 +40,7 @@
 
 <script>
 import vPagination from 'vue-plain-pagination'
+import Student from './service/student.js';
 import Header from './parts/Header'
 // import moment from 'moment';
 
@@ -78,24 +79,25 @@ export default {
   }),
   methods:{
     getStudentsList: function(){
-      // if (this.students.length == 0){
       window.backend.Service.GetStudents("", "", 10, 0)
       .then(
         data=>{
-          this.students = data["students"];
-          this.studentsCount = data["count"];
-
-          for (var i = 0; i < this.students.length; i++) {
-            let fn = JSON.parse(this.students[i].first_name);
-            this.students[i].first_name = fn.fr;
-            let ln = JSON.parse(this.students[i].last_name);
-            this.students[i].last_name = ln.fr;
+          this.data = data;
+          for (var i = 0; i < data["students"].length; i++) {
+            let s = new Student(data["students"][0], null)
+            this.students.push(s);
           }
-          this.loaded = true;
+          this.studentsCount = data["count"];
           this.getNumPages();
+          this.loaded = true;
         },
-        err=>{this.error = err}
       )
+      err=>{this.error = err}
+      // this.students.addStudents(this.data["students"]);
+      // for (var i = 0; i < this.data["students"].length; i++) {
+      //   let student = new Student(this.data["students"][i], null);
+      //   this.students.push(student);
+      // }
     },
     getNumPages: function(){
       if(this.studentsCount > this.limitPerPage){
@@ -104,16 +106,6 @@ export default {
         if(remainder>0){
           this.pages++;
         }
-      }
-    },
-    getStudentNextExamName: function(student){
-      switch (student.next_exam) {
-        case "Highway code":
-          return "Code";
-        case "Niche":
-          return "Créneau";
-        case "Circuit":
-          return "Circuit";
       }
     },
   }

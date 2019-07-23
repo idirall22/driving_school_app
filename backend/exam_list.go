@@ -56,6 +56,7 @@ func (s *Service) CreateExamList(date, examiner string,
 				);`
 
 	tx := MainService.db.Begin()
+
 	for i := 0; i < len(students); i++ {
 		if err := tx.Exec(query,
 			students[i].NextExam,
@@ -68,6 +69,7 @@ func (s *Service) CreateExamList(date, examiner string,
 		}
 	}
 	tx.Commit()
+
 	return examList, nil
 }
 

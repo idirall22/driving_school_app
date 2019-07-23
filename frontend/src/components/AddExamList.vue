@@ -13,7 +13,6 @@
     <div class="row">
       <Header initTitle="Ajouter une Liste D'Examen"></Header>
     </div>
-
     <b-form @submit="onSubmit">
 
       <!-- Exam date -->
@@ -46,8 +45,8 @@
             <li v-for="student in studentsFound" :key="student.id"
               class="list-group-item d-flex justify-content-between align-items-center">
               <p class="p-0 m-0">
-                {{student.last_name | capitalize}}
-                {{student.first_name | capitalize}}
+                {{student.studentInfos.last_name_fr | capitalize}}
+                {{student.studentInfos.first_name_fr | capitalize}}
               </p>
               <button class="btn btn-primary m-0"
                 @click="addStudent(student)"
@@ -64,24 +63,32 @@
         <table class="table table-striped table-sm">
           <thead>
             <tr>
-              <th>Ordre</th>
-              <th>Nom</th>
-              <th>Prénom</th>
-              <th>Date De Naissance</th>
-              <th>Catégory</th>
-              <th>Examen</th>
-              <th></th>
+              <th class="align-middle text-center">Ordre</th>
+              <th class="align-middle text-center">Num Dossier</th>
+              <th class="align-middle text-center">Nom et Prénom</th>
+              <th class="align-middle text-center">Date De Naissance</th>
+              <th class="align-middle text-center">Catégory</th>
+              <th class="align-middle text-center">Examen</th>
+              <th class="align-middle text-center"></th>
             </tr>
 
           </thead>
           <tbody>
             <tr v-for="(student, index) in students" :key="student.key">
               <td class="align-middle text-center">{{index+1}}</td>
-              <td class="align-middle text-center">{{student.file_number}}</td>
-              <td class="align-middle text-center">{{student.first_name | capitalize}} {{student.last_name | capitalize}}</td>
-              <td class="align-middle text-center">{{student.birthday | moment2}}</td>
+              <td class="align-middle text-center">
+                {{student.studentInfos.file_number}}
+              </td>
+              <td class="align-middle text-center">
+                {{student.studentInfos.last_name_fr | capitalize}}
+                {{student.studentInfos.first_name_fr | capitalize}}
+              </td>
+              <td class="align-middle text-center">
+                {{student.studentInfos.birthday}}
+              </td>
               <td class="align-middle text-center">B</td>
-              <td class="align-middle text-center">{{student.next_exam}}</td>
+              <td class="align-middle text-center">
+                {{student.studentInfos.next_exam}}</td>
               <td>
                 <button @click.prevent="deleteStudent(index)"
                   type="button" class="form-control close"
@@ -100,6 +107,7 @@
 <script>
 import VueBootstrapDatetimepicker from 'vue-bootstrap-datetimepicker';
 import Header from './parts/Header';
+import Student from './service/student.js';
 import moment from 'moment'
 
 export default {
@@ -134,9 +142,14 @@ export default {
       //Check if student name length is greather then 2
       if(this.studentLastName.length > 2){
         window.backend.Service.GetStudents(
-          this.studentLastName, "", 10, 0).then(data=>{
-          this.found = true;
-          this.studentsFound = data["students"];
+          this.studentLastName, "", 10, 0)
+          .then(
+            data=>{
+              for (var i = 0; i < data["students"].length; i++) {
+                let student = new Student(data["students"][i], null);
+                this.studentsFound.push(student)
+              }
+              this.found = true;
         })
       }else{
         this.studentsFound = [];
@@ -197,3 +210,4 @@ export default {
 </script>
 <style scoped>
 </style>
+

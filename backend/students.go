@@ -53,7 +53,7 @@ func (s *Service) GetStudents(lastName, ordering string,
 		Order(orderingString).
 		Count(&studentsListOut.Count).
 		Limit(limit).Offset(offset).
-		Find(&studentsListOut.Students, "last_name LIKE ?", lastName+"%").
+		Find(&studentsListOut.Students, `last_name LIKE ?`, "%"+lastName+"%").
 		Error; err != nil {
 		return nil, err
 	}
