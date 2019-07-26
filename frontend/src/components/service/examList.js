@@ -1,5 +1,5 @@
 import moment from 'moment';
-// import Student from './student.js'
+import Student from './student.js'
 
 
 const DATE_FORMAT = "DD-MM-YYYY";
@@ -18,17 +18,24 @@ export default class ExamList{
 
   constructor(examList) {
     this.examListInfos = examList;
-
-    // Check if there is a key students_exams in examListInfos
-    this.createStudentsExamslistIfNotExist();
-    this.momentExamDate();
+    this.data = [];
+    this.parseExamListData();
   }
+
+  // Parse data
+  parseExamListData(){
+    this.momentExamDate();
+    this.createStudentsExamslistIfNotExist();
+    this.convertStudentsExamsToStudentsObject();
+  }
+
   momentExamDate(){
     if("date_exam" in this.examListInfos){
       let de = this.examListInfos.date_exam;
       this.examListInfos.date_exam = moment(de).format(DATE_FORMAT);
     }
   }
+
   // return false if student is not in students_exams list
   checkIfStudentInExamList(studentID){
     if(this.examListInfos.students_exams.length > 0){
@@ -41,18 +48,30 @@ export default class ExamList{
     return [false, -1]
   }
 
+  // Convert students_exams object to Student object
+  convertStudentsExamsToStudentsObject(){
+    for (var i = 0; i < this.examListInfos.students_exams.length; i++) {
+      let std = this.examListInfos.students_exams[i].student;
+      delete this.examListInfos.students_exams[i].student
+      this.examListInfos.students_exams[i].student = new Student(std, null);
+    }
+  }
+
+  // Add students_exams key if not exist
   createStudentsExamslistIfNotExist(){
     if(!("students_exams" in this.examListInfos)){
       this.examListInfos.students_exams = [];
     }
   }
 
+  // Add student to students_exams list
   addStudentToStudentsExams(student){
     if(!this.checkIfStudentInExamList(student)[0]){
       this.examListInfos.students_exams.push(student);
     }
   }
 
+  // Remove student from students_exams list
   removeStudentFromStudentsExams(studentID){
     let check = this.checkIfStudentInExamList(studentID);
     if(check[0]){
@@ -60,13 +79,17 @@ export default class ExamList{
     }
   }
 
+  // Update examListInfos before update it and send it to backend
   updateExamList(){
     if("date_exam" in this.examListInfos){
       let ed = this.examListInfos.date_exam;
       this.examListInfos.date_exam = moment(ed, DATE_FORMAT).format();
     }
+    this.createStudentsExamslistIfNotExist()
+    this.convertStudentsExamsToStudentsObject()
   }
 
+  // Archive an dearchive an examList
   archiveAndDearchive(){
     this.examListInfos.archived = !this.examListInfos.archived;
   }

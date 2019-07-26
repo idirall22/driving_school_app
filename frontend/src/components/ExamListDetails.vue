@@ -1,6 +1,7 @@
 <template>
 
  <div v-if="loaded" id="examListDetails">
+   {{errorUpdateExamList}}
    <b-alert
      v-model="examListUpdated"
      :variant="alertVariant"
@@ -11,23 +12,36 @@
 
    <Header initTitle="Liste d'examen"></Header>
 
-   <div class="mb-3 d-flex justify-content-start">
-     <button v-if="!examList.examListInfos.archived"
-       class="btn btn-danger"
-       @click="deleteExamList"
-       type="button">Suprimer la liste
-     </button>
-     <button v-if="!examList.examListInfos.archived"
-       class="ml-2 btn btn-success"
-       @click="archiveExamList()"
-       type="button">Archivé
-     </button>
-     <button v-else
-       class="ml-2 btn btn-warning"
-       @click="archiveExamList()"
-       type="button">Modifier
-     </button>
- </div>
+   <div class="mb-3 d-flex justify-content-between">
+      <div class="">
+        <button v-if="!examList.examListInfos.archived"
+          class="btn btn-warning"
+          @click="deleteExamList"
+          type="button">Suprimer la liste
+        </button>
+        <button v-if="!examList.examListInfos.archived"
+          class="ml-2 btn btn-success"
+          @click="archiveExamList()"
+          type="button">Archivé
+        </button>
+        <button v-else
+          class="ml-2 btn btn-warning"
+          @click="archiveExamList()"
+          type="button">Modifier
+        </button>
+      </div>
+      <div class="">
+        <button
+          class="btn btn-danger"
+          @click="exportPDF"
+          type="button">PDF
+        </button>
+      </div>
+   </div>
+
+
+
+
    <b-form @submit="updateExamList">
      <!-- Examiner Name -->
      <b-form-group id="examinerName"
@@ -206,16 +220,24 @@ export default {
     loaded: false,
 
     id: 0,
+    data: {},
     examList: {},
     studentLastName: "",
     students: [],
     studentsFound: [],
+    updateButton: false,
+    errPDF: null,
 
     options:{
       format:"DD-MM-YYYY",
       useCurrent: false
     },
   }),
+  watch:{
+    data(){
+      this.examList = this.data;
+    }
+  },
   methods:{
     // get an exam list from database
     getExamList: function(){
@@ -225,15 +247,6 @@ export default {
       window.backend.Service.GetExamList(this.id)
       .then(
         data=>{
-          if("students_exams" in data){
-            if(data.students_exams.length > 0){
-              for (var i = 0; i < data.students_exams.length; i++) {
-                let std = new Student(data.students_exams[i].student, null);
-                data.students_exams[i].student = std;
-              }
-            }
-          }
-          // data.students_exams = students;
           this.examList = new ExamList(data);
           this.loaded = true;
         },
@@ -241,6 +254,7 @@ export default {
           this.errorGetExamList = err;
         }
       );
+      this.updateButton = false;
     },
 
     // Remove a student added to exam list
@@ -345,16 +359,18 @@ export default {
       this.examListUpdated = true;
     },
     updateExamList: function(){
-      // Update Exam list
+      // Update Exam list to make it exportable to backend
       this.examList.updateExamList();
 
+      // parse student to object
       let outStudentsList = []
-      for (var i = 0; i < this.students.length; i++) {
-        this.students[i].outStudent();
-        outStudentsList.push(this.students[i].studentInfos);
+      if(this.students.length > 0){
+        for (var i = 0; i < this.students.length; i++) {
+          this.students[i].outStudent();
+          outStudentsList.push(this.students[i].studentInfos);
+        }
       }
-      this.students = [];
-
+      // make request to backend
       window.backend.Service.UpdateExamList(
         this.examList.examListInfos.id,
         this.examList.examListInfos.date_exam,
@@ -362,7 +378,11 @@ export default {
         this.examList.examListInfos.students_exams,
         outStudentsList,
       ).then(
-        data=>{this.data= data},
+        data=>{
+          this.examList = new ExamList(data);
+          this.students = [];
+
+        },
         err=>{this.errorUpdateExamList = err},
       );
 
@@ -370,12 +390,16 @@ export default {
         this.alertVariant = "warning";
         this.alertMessage = this.examList.EXAM_LIST_ERR_UPDATED_MESSAGE;
       }else{
-        this.examList.momentExamDate();
         this.alertVariant = "success";
         this.alertMessage = this.examList.EXAM_LIST_UPDATED_MESSAGE;
       }
       this.examListUpdated = true;
     },
+    exportPDF: function(){
+      this.examList.updateExamList();
+      window.backend.Service.ExportExamListPDF(this.id)
+      .then(err=>this.errPDF = err);
+    }
   }
 }
 </script>

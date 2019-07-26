@@ -4,29 +4,29 @@
       <div class="sidebar-sticky">
         <ul class="nav flex-column">
           <div class="drivingSchoolName">
-            <h5>Driving School</h5>
+            <h5>Auto École Noureddine</h5>
           </div>
           <!-- TODO make better solution -->
           <!-- Students list -->
 
           <li class="nav-item">
             <router-link :to="{ name: 'listStudents' }" class="nav-link">
-              Students
+              Tous Étudiants
             </router-link>
           </li>
           <li class="nav-item">
             <router-link :to="{ name: 'addStudent' }" class="nav-link">
-              Add Student
+              Ajouté Un Étudiant
             </router-link>
           </li>
           <li class="nav-item">
             <router-link :to="{ name: 'addExamList' }" class="nav-link">
-              Add Exam List
+              Ajouté Une Liste Éxamen
             </router-link>
           </li>
           <li class="nav-item">
             <router-link :to="{ name: 'examLists' }" class="nav-link">
-              Lists Exams
+              Toutes Les Liste Éxamen
             </router-link>
           </li>
         </ul>

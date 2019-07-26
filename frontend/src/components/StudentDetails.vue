@@ -9,14 +9,13 @@
         @dismissed="closeAlert()">
         {{alertMessage}}
       </b-alert>
-
       <Header initTitle="Détails"></Header>
       <p>Prochain Examen:</p>
 
       <b-progress :max="3" class="mb-3" height= "2rem">
         <b-progress-bar
           variant="success"
-          :value="student.getStudentNextExam()"
+          :value="student.studentInfos.next_exam"
         > <strong>{{student.getStudentNextExamName()}}</strong>
         </b-progress-bar>
       </b-progress>
@@ -321,8 +320,34 @@
           </b-button>
         </b-form>
       </div>
+      <br>
+      <Header initTitle="Examens Passé"></Header>
+      <div class="table-responsive">
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th class="align-middle text-center">N°</th>
+              <th class="align-middle text-center">Date d'éxamen</th>
+              <th class="align-middle text-center">Examen</th>
+              <th class="align-middle text-center">Résultats</th>
+            </tr>
+
+          </thead>
+          <tbody>
+            <tr v-for="(exam, index) in student.exams" :key="exam.id">
+              <td class="align-middle text-center">{{index+1}}</td>
+              <td class="align-middle text-center">{{exam.date_exam | moment2}}</td>
+              <td class="align-middle text-center">{{student.getExamName(exam.exam)}}</td>
+              <td v-if="exam.status" class="align-middle text-center">Gagné</td>
+              <td v-else class="align-middle text-center">Perdu</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
   </div>
+
 </template>
 
 
@@ -369,7 +394,7 @@ export default {
       this.id = this.$route.params.id;
       window.backend.Service.GetStudent(this.id, "").then(
         data=>{
-          this.student = new Student(data["student"], data["exmas"]);
+          this.student = new Student(data["student"], data["exams"]);
           this.ready = true;
         },
         err=>{

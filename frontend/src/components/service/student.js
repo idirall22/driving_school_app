@@ -107,23 +107,24 @@ export default class Student{
   // Translate to french language
   getStudentNextExamName(){
     switch (this.studentInfos.next_exam) {
-      case "Highway code":
+      case 1:
         return "Code";
-      case "Niche":
+      case 2:
         return "Créneau";
-      case "Circuit":
+      case 3:
         return "Circuit";
     }
   }
-
-  getStudentNextExam(){
-    switch (this.studentInfos.next_exam) {
-      case "Highway code":
-        return 1;
-      case "Niche":
-        return 2
-      case "Circuit":
-        return 3
+  getExamName(index){
+    switch (index) {
+      case 1:
+        return "Code";
+      case 2:
+        return "Créneau";
+      case 3:
+        return "Circuit";
+      case 4:
+        return "Fini";
     }
   }
 }

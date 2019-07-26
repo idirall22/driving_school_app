@@ -17,10 +17,16 @@
       <tbody>
         <tr v-for="student in students" :key="student.studentInfos.id">
           <td class="align-middle text-center">{{student.studentInfos.file_number}}</td>
-          <td class="align-middle text-center">{{student.studentInfos.last_name_fr | capitalize}}</td>
-          <td class="align-middle text-center">{{student.studentInfos.first_name_fr | capitalize}}</td>
-          <td class="align-middle text-center">{{student.studentInfos.registred_date}}</td>
-          <td class="align-middle text-center">code</td>
+          <td class="align-middle text-center">
+            {{student.studentInfos.last_name_fr | capitalize}}
+          </td>
+          <td class="align-middle text-center">
+            {{student.studentInfos.first_name_fr | capitalize}}
+          </td>
+          <td class="align-middle text-center">
+            {{student.studentInfos.registred_date}}
+          </td>
+          <td class="align-middle text-center">{{student.getExamName(student.studentInfos.next_exam)}}</td>
           <td class="align-middle text-center"><router-link class= "btn btn-danger" :to="{ name: 'studentDetails',
           params: { id: student.studentInfos.id}}">infos</router-link></td>
         </tr>
@@ -93,11 +99,6 @@ export default {
         },
       )
       err=>{this.error = err}
-      // this.students.addStudents(this.data["students"]);
-      // for (var i = 0; i < this.data["students"].length; i++) {
-      //   let student = new Student(this.data["students"][i], null);
-      //   this.students.push(student);
-      // }
     },
     getNumPages: function(){
       if(this.studentsCount > this.limitPerPage){
