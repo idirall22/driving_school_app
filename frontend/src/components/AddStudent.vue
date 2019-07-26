@@ -314,6 +314,7 @@
 <script>
 import VueBootstrapDatetimepicker from 'vue-bootstrap-datetimepicker';
 import Header from './parts/Header';
+import {StudentMessages} from './service/messages.js';
 import moment from 'moment';
 
 export default {
@@ -321,10 +322,6 @@ export default {
   components: {
     VueBootstrapDatetimepicker,
     Header,
-  },
-  created() {
-    //do something after creating vue instance
-    this.resetMessagesAlert();
   },
   data: () => ({
     options:{
@@ -360,24 +357,30 @@ export default {
     errorCreateStudent: null,
   }),
   methods:{
-    // Rset Alert Message
-    resetMessagesAlert:function(){
-      this.alertVariant = "success";
-      this.alertMessage = "L'étudiant a été crée";
-    },
-
     addStudent:function(){
-      if(this.errorCreateStudent != null){
-        this.resetMessagesAlert();
-      }
       if(this.maidenName == ""){
         this.maidenName = "None";
         this.arMaidenName = "None";
       }
       this.student = {
-        "first_name": JSON.stringify({"fr":this.firstName, "ar":this.arFirstName}),
-        "last_name": JSON.stringify({"fr":this.lastName, "ar":this.arLastName}),
-        "maiden_name": JSON.stringify({"fr":this.maidenName, "ar":this.arMaidenName}),
+        "first_name": JSON.stringify(
+          {
+            "fr":this.firstName,
+            "ar":this.arFirstName
+          }
+        ),
+        "last_name": JSON.stringify(
+          {
+            "fr":this.lastName,
+            "ar":this.arLastName
+          }
+        ),
+        "maiden_name": JSON.stringify(
+          {
+            "fr":this.maidenName,
+            "ar":this.arMaidenName
+          }
+        ),
         "phone_number": this.phoneNumber,
         "birthday": moment(this.birthday).format(),
         "country": this.birthCountry,
@@ -394,22 +397,22 @@ export default {
           data=>{this.data = data;},
           err=>{this.errorCreateStudent = err;},
         )
+        let message = new StudentMessages();
         if(this.errorCreateStudent != null){
-          this.alertMessage = "Il y'a une erreur, l'étudiant n'a pas été crée";
           this.alertVariant = "warning";
+          this.alertMessage = message.STUDENT_ERR_CREATED_MESSAGE;
+        }else{
+          this.alertVariant = "success";
+          this.alertMessage = message.STUDENT_CREATED_MESSAGE;
         }
         this.studentCreated = true;
     },
     closeAlert:function(){
       this.studentCreated = false;
       this.errorCreateStudent = null;
-      this.resetMessagesAlert();
     },
   }
 }
 </script>
 <style scoped>
-.ar{
-  direction: rtl;
-}
 </style>

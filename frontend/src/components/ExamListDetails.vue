@@ -1,7 +1,6 @@
 <template>
 
  <div v-if="loaded" id="examListDetails">
-   {{errorUpdateExamList}}
    <b-alert
      v-model="examListUpdated"
      :variant="alertVariant"
@@ -9,22 +8,21 @@
      @dismissed="closeAlert()">
      {{alertMessage}}
    </b-alert>
-
    <Header initTitle="Liste d'examen"></Header>
 
    <div class="mb-3 d-flex justify-content-between">
-      <div class="">
-        <button v-if="!examList.examListInfos.archived"
+      <div class="d-flex justify-content-start">
+        <button v-if="!examList.archived"
           class="btn btn-warning"
           @click="deleteExamList"
           type="button">Suprimer la liste
         </button>
-        <button v-if="!examList.examListInfos.archived"
+        <b-button v-if="!examList.archived && checkIfExamListCanBeArchived()"
           class="ml-2 btn btn-success"
           @click="archiveExamList()"
           type="button">Archivé
-        </button>
-        <button v-else
+        </b-button>
+        <button v-else-if = "!examList.archived && checkIfExamListCanBeArchived()"
           class="ml-2 btn btn-warning"
           @click="archiveExamList()"
           type="button">Modifier
@@ -48,63 +46,34 @@
        label="Cherché des étudiants:" label-for="examinerName">
        <b-form-input
          id="examinerName"
-         v-model="examList.examListInfos.examiner"
+         v-model="examList.examiner"
          type="text"
          placeholder="Nom de l'éxaminateur"
-         :readonly="examList.examListInfos.archived">
+         :readonly="examList.archived">
        </b-form-input>
      </b-form-group>
      <!-- End examiner Name -->
      <!-- Exam date -->
        <b-form-group id="examDate"
          label="Date d'examen:" label-for="examDate">
-         <div v-if="!examList.examListInfos.archived">
+         <div v-if="!examList.archived">
            <vue-bootstrap-datetimepicker
-             v-model="examList.examListInfos.date_exam"
+             v-model="examList.date_exam"
              id="datepicker"
              :config="options">
            </vue-bootstrap-datetimepicker>
          </div>
          <div v-else>
-           {{examList.examListInfos.date_exam}}
+           {{examList.date_exam}}
          </div>
        </b-form-group>
      <!-- end exam Date -->
-     <!-- Search students -->
-     <b-form-group id="searchStudents"
-       label="Cherché des étudiants:" label-for="searchStudents">
-       <b-form-input
-         id="searchStudents"
-         v-model="studentLastName"
-         type="text"
-         placeholder="Nom de l'étudiant"
-         :readonly="examList.examListInfos.archived">
-       </b-form-input>
-     </b-form-group>
-     <b-button
-       :disabled="examList.examListInfos.archived"
-       @click="searchStudent()"
-       variant="primary">Cherché
-     </b-button>
-     <!-- end search students -->
-     <div v-if="found">
-       <div class="col mt-3 p-0">
-         <ul class="list-group p-0 m-0">
-           <li v-for="(student, index) in studentsFound" :key="student.studentInfos.id"
-             class="list-group-item d-flex justify-content-between align-items-center">
-             <p class="p-0 m-0">
-               {{student.studentInfos.last_name_fr | capitalize}}
-               {{student.studentInfos.first_name_fr | capitalize}}
-             </p>
-             <button class="btn btn-primary ml-3"
-               @click="addStudent(student.studentInfos.id, index)"
-               type="button"
-               name="button">Add
-             </button>
-           </li>
-         </ul>
-       </div>
-     </div>
+
+     <SearchStudent
+       ref="search"
+       :students="students">
+     </SearchStudent>
+
      <br>
      <br>
      <!-- array students -->
@@ -123,53 +92,62 @@
            </tr>
          </thead>
          <tbody>
-           <tr v-for="(exam, index) in examList.examListInfos.students_exams"
-              :key="exam.student.studentInfos.id">
+           <tr class="exams border-success" v-for="(exam, index) in examList.students_exams"
+              :key="exam.student.id">
 
              <td class="align-middle text-center">{{index+1}}</td>
              <td class="align-middle text-center">
-               {{exam.student.studentInfos.file_number}}
+               {{exam.student.file_number}}
              </td>
              <td class="align-middle text-center">
-               {{exam.student.studentInfos.last_name_fr | capitalize}}
-               {{exam.student.studentInfos.first_name_fr | capitalize}}
+               {{exam.student.last_name_fr | capitalize}}
+               {{exam.student.first_name_fr | capitalize}}
              </td>
              <td class="align-middle text-center">
-               {{exam.student.studentInfos.birthday}}
+               {{exam.student.birthday}}
              </td>
              <td class="align-middle text-center">B</td>
-             <td class="align-middle text-center">{{exam.student.getStudentNextExamName()}}</td>
              <td class="align-middle text-center">
-               <input v-model="exam.status" type="checkbox">
+               {{exam.student.getExamName(exam.student.next_exam)}}
              </td>
              <td class="align-middle text-center">
-               <button @click.prevent="removeStudent(index)"
+               <b-form-checkbox
+                  id="status-checkbox"
+                  v-model="exam.status"
+                ></b-form-checkbox>
+              </td>
+             <td class="align-middle text-center">
+               <button @click.prevent="removeStudentFromStudentsExams(index)"
                  type="button" class="form-control close"
                  data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </td>
            </tr>
-           <tr v-for="(student, index) in students" :key="student.studentInfos.id">
+           <tr class="students border-warning" v-for="(student, index) in students" :key="student.id">
              <td class="align-middle text-center">{{index+1}}</td>
              <td class="align-middle text-center">
-               {{student.studentInfos.file_number}}
+               {{student.file_number}}
              </td>
              <td class="align-middle text-center">
-               {{student.studentInfos.last_name_fr | capitalize}}
-               {{student.studentInfos.first_name_fr | capitalize}}
+               {{student.last_name_fr | capitalize}}
+               {{student.first_name_fr | capitalize}}
              </td>
              <td class="align-middle text-center">
-               {{student.studentInfos.birthday}}
+               {{student.birthday}}
              </td>
              <td class="align-middle text-center">B</td>
              <td class="align-middle text-center">
-               {{student.studentInfos.next_exam}}
+               {{student.next_exam}}
              </td>
              <td class="align-middle text-center">
-               <input type="checkbox"> </td>
+               <b-form-checkbox
+                  id="status"
+                  name="status"
+                ></b-form-checkbox>
+            </td>
              <td class="align-middle text-center">
-               <button @click.prevent="removeStudentAdded(student.studentInfos.id)"
+               <button @click.prevent="removeStudentAdded(student.id)"
                  type="button" class="form-control close"
                  data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -179,7 +157,7 @@
          </tbody>
        </table>
        <b-button
-         :disabled="examList.examListInfos.archived"
+         :disabled="examList.archived"
          block type="submit"
          variant="primary">
          Modifier la liste d'éxamen
@@ -191,14 +169,17 @@
 
 <script>
 import VueBootstrapDatetimepicker from 'vue-bootstrap-datetimepicker';
-import Student from './service/student.js';
+// import Student from './service/student.js';
 import ExamList from './service/examList.js';
+import {ExamListMessages} from './service/messages.js';
 import Header from './parts/Header';
-// import moment from 'moment'
+import SearchStudent from './parts/SearchStudent';
+import moment from 'moment';
 
 export default {
   components: {
     VueBootstrapDatetimepicker,
+    SearchStudent,
     Header
   },
 
@@ -216,16 +197,11 @@ export default {
     errorGetExamList: null,
 
     examListUpdated: false,
-    found: false,
     loaded: false,
 
     id: 0,
-    data: {},
     examList: {},
-    studentLastName: "",
     students: [],
-    studentsFound: [],
-    updateButton: false,
     errPDF: null,
 
     options:{
@@ -233,16 +209,20 @@ export default {
       useCurrent: false
     },
   }),
-  watch:{
-    data(){
-      this.examList = this.data;
-    }
-  },
   methods:{
+
+    closeAlert:function(){
+      this.examListUpdated = false;
+      this.errorUpdateExamList = null;
+      this.errorArchive = null;
+      this.errorDelete = null;
+    },
+
     // get an exam list from database
     getExamList: function(){
       // Get id from url
       this.id = parseInt(this.$route.params.id, 10);
+
       // Make request to backend
       window.backend.Service.GetExamList(this.id)
       .then(
@@ -254,57 +234,39 @@ export default {
           this.errorGetExamList = err;
         }
       );
-      this.updateButton = false;
     },
 
     // Remove a student added to exam list
     removeStudentAdded: function(studentID){
       for (var i = 0; i < this.students.length; i++) {
-        if(this.students[i].studentInfos.id == studentID){
+        if(this.students[i].id == studentID){
           this.students.splice(i, 1)
         }
       }
     },
 
-    // Search a student in database
-    searchStudent:function(){
-      //Check if student name length is greather then 2
-      if(this.studentLastName.length > 2){
-        window.backend.Service.GetStudents(
-        this.studentLastName, "", 10, 0).then(
-          data=>{
-            this.studentsFound = [];
-            for (var i = 0; i < data["students"].length; i++) {
-              let student = new Student(data["students"][i], null);
-              this.studentsFound.push(student);
-            }
-            this.found = true;
-        })
-      }else{
-        this.studentsFound = [];
-        this.found = false;
-      }
+    removeStudentFromStudentsExams: function(index){
+      this.examList.students_exams.splice(index, 1);
     },
-    removeStudent: function(index){
-      this.examList.examListInfos.students_exams.splice(index, 1);
-    },
+
     checkIfAlreadyAdded: function(studentID){
       for (var i = 0; i < this.students.length; i++) {
-        if(this.students[i].studentInfos.id == studentID){
+        if(this.students[i].id == studentID){
           return true
         }
       }
       return false;
     },
+
     addStudent: function(studentID, index){
       //check if not student is already in exam list
       if(!this.examList.checkIfStudentInExamList(studentID)[0] &&
         !this.checkIfAlreadyAdded(studentID)){
+
         this.students.push(this.studentsFound[index]);
       }
-      this.studentsFound = [];
-      this.found = false;
     },
+
     deleteExamList: function(){
       window.backend.Service.DeleteExamList(this.id)
       .then(
@@ -317,13 +279,6 @@ export default {
       }
     },
 
-    closeAlert:function(){
-      this.examListUpdated = false;
-      this.errorUpdateExamList = null;
-      this.errorArchive = null;
-      this.errorDelete = null;
-    },
-
     archiveExamList: function(){
       // switch betxeen true an false to archive an deachive an
       // exam list
@@ -332,50 +287,51 @@ export default {
       // Make the request to backend
       window.backend.Service.ArchiveExamList(
         this.id,
-        this.examList.examListInfos.archived
+        this.examList.archived
       ).then(
         err=>{this.errorArchive = err}
       );
 
+      let message = new ExamListMessages()
       // Chenck if there is an error
       if(this.errorArchive != null){
         this.alertVariant = "warning";
-
         // Check if we wanted to archive or deachive
-        if(this.examList.examListInfos.archived){
-          this.alertMessage = this.examList.EXAM_LIST_ERR_ARCHIVED_MESSAGE;
+        if(this.examList.archived){
+          this.alertMessage = message.EXAM_LIST_ERR_ARCHIVED_MESSAGE;
         }else{
-          this.alertMessage = this.examList.EXAM_LIST_ERR_DEARCHIVED_MESSAGE;
+          this.alertMessage = message.EXAM_LIST_ERR_DEARCHIVED_MESSAGE;
         }
 
       }else{
         this.alertVariant = "success";
-        if(this.examList.examListInfos.archived){
-          this.alertMessage = this.examList.EXAM_LIST_ARCHIVED_MESSAGE;
+        if(this.examList.archived){
+          this.alertMessage = message.EXAM_LIST_ARCHIVED_MESSAGE;
         }else{
-          this.alertMessage = this.examList.EXAM_LIST_DEARCHIVED_MESSAGE;
+          this.alertMessage = message.EXAM_LIST_DEARCHIVED_MESSAGE;
         }
       }
       this.examListUpdated = true;
     },
+
     updateExamList: function(){
       // Update Exam list to make it exportable to backend
-      this.examList.updateExamList();
+      let exportExamList = this.examList.outExamList();
 
       // parse student to object
       let outStudentsList = []
       if(this.students.length > 0){
         for (var i = 0; i < this.students.length; i++) {
-          this.students[i].outStudent();
-          outStudentsList.push(this.students[i].studentInfos);
+          this.students[i] = this.students[i].outStudent();
+          outStudentsList.push(this.students[i]);
         }
       }
       // make request to backend
       window.backend.Service.UpdateExamList(
-        this.examList.examListInfos.id,
-        this.examList.examListInfos.date_exam,
-        this.examList.examListInfos.examiner,
-        this.examList.examListInfos.students_exams,
+        exportExamList.id,
+        exportExamList.date_exam,
+        exportExamList.examiner,
+        exportExamList.students_exams,
         outStudentsList,
       ).then(
         data=>{
@@ -385,18 +341,22 @@ export default {
         },
         err=>{this.errorUpdateExamList = err},
       );
-
+      let message = new ExamListMessages()
       if(this.errorUpdateExamList != null){
         this.alertVariant = "warning";
-        this.alertMessage = this.examList.EXAM_LIST_ERR_UPDATED_MESSAGE;
+        this.alertMessage = message.EXAM_LIST_ERR_UPDATED_MESSAGE;
       }else{
         this.alertVariant = "success";
-        this.alertMessage = this.examList.EXAM_LIST_UPDATED_MESSAGE;
+        this.alertMessage = message.EXAM_LIST_UPDATED_MESSAGE;
       }
       this.examListUpdated = true;
     },
+    checkIfExamListCanBeArchived: function(){
+      let now = moment();
+      let date = moment(this.examList.date_exam, "DD-MM-YYYY");
+      return now.day() <= date.day();
+    },
     exportPDF: function(){
-      this.examList.updateExamList();
       window.backend.Service.ExportExamListPDF(this.id)
       .then(err=>this.errPDF = err);
     }
@@ -405,4 +365,10 @@ export default {
 </script>
 
 <style scoped>
+.exams{
+  border-left: 8px solid red;
+}
+.students{
+  border-left: 8px solid green;
+}
 </style>

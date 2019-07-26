@@ -15,12 +15,12 @@
       <b-progress :max="3" class="mb-3" height= "2rem">
         <b-progress-bar
           variant="success"
-          :value="student.studentInfos.next_exam"
-        > <strong>{{student.getStudentNextExamName()}}</strong>
+          :value="student.next_exam"
+        > <strong>{{student.getExamName(student.next_exam)}}</strong>
         </b-progress-bar>
       </b-progress>
 
-      <div v-if="student.studentInfos != null">
+      <div v-if="student != null">
         <b-form @submit="updateStudent">
           <div class="row">
               <div class="col">
@@ -32,7 +32,7 @@
 
                 <b-form-input
                   id="firstName"
-                  v-model="student.studentInfos.first_name_fr"
+                  v-model="student.first_name_fr"
                   type="text"
                   placeholder="Prénom"
                   required
@@ -48,7 +48,7 @@
 
                   <b-form-input
                     id="lastName"
-                    v-model="student.studentInfos.last_name_fr"
+                    v-model="student.last_name_fr"
                     type="text"
                     placeholder="Nom"
                     required
@@ -64,7 +64,7 @@
 
                   <b-form-input
                     id="maidenName"
-                    v-model="student.studentInfos.maiden_name_fr"
+                    v-model="student.maiden_name_fr"
                     type="text"
                     placeholder= "Nom De Jeune Fille"
                     required
@@ -83,7 +83,7 @@
 
                   <b-form-input
                   id="firstName"
-                    v-model="student.studentInfos.first_name_ar"
+                    v-model="student.first_name_ar"
                     type="text"
                     placeholder="الإسم"
                     required
@@ -99,7 +99,7 @@
 
                   <b-form-input
                     id="lastName"
-                    v-model="student.studentInfos.last_name_ar"
+                    v-model="student.last_name_ar"
                     type="text"
                     placeholder="اللقب"
                     required
@@ -117,7 +117,7 @@
                   <b-form-input
                     direction:RTL
                     id="maidenName"
-                    v-model="student.studentInfos.maiden_name_ar"
+                    v-model="student.maiden_name_ar"
                     type="text"
                     placeholder="إسم العائلة قبل الزواج"
                     required
@@ -138,7 +138,7 @@
                 label-for="birthday">
 
                 <vue-bootstrap-datetimepicker
-                  v-model="student.studentInfos.birthday"
+                  v-model="student.birthday"
                   :config="options"
                 >
                 </vue-bootstrap-datetimepicker>
@@ -154,7 +154,7 @@
 
                 <b-form-input
                   id="country"
-                  v-model="student.studentInfos.country"
+                  v-model="student.country"
                   type="text"
                   placeholder="Algerie"
                   required
@@ -172,7 +172,7 @@
 
                 <b-form-select
                   class="mb-2 mr-sm-2 mb-sm-0"
-                  v-model="student.studentInfos.gender"
+                  v-model="student.gender"
                   :options="[
                     { 'value': 'homme', 'text': 'Homme'},
                     { 'value': 'femme', 'text': 'Femme'},
@@ -197,7 +197,7 @@
                 label-for="registredDate">
 
                 <vue-bootstrap-datetimepicker
-                  v-model="student.studentInfos.registred_date"
+                  v-model="student.registred_date"
                   :config="options"
                 >
                 </vue-bootstrap-datetimepicker>
@@ -214,7 +214,7 @@
 
                 <b-form-input
                   id="phoneNumber"
-                  v-model="student.studentInfos.phone_number"
+                  v-model="student.phone_number"
                   type="text"
                   placeholder="01-23-45-67-89"
                   required
@@ -232,7 +232,7 @@
 
             <b-form-input
               id="address"
-              v-model="student.studentInfos.address_street"
+              v-model="student.address_street"
               type="text"
               placeholder="adresse"
               required
@@ -250,7 +250,7 @@
 
                 <b-form-input
                   id="department"
-                  v-model="student.studentInfos.department"
+                  v-model="student.department"
                   type="text"
                   placeholder="Bir el djir"
                   required
@@ -267,7 +267,7 @@
 
                 <b-form-input
                   id="city"
-                  v-model="student.studentInfos.city"
+                  v-model="student.city"
                   type="text"
                   placeholder="Oran"
                   required
@@ -287,7 +287,7 @@
 
                 <b-form-input
                   id="fileNumber"
-                  v-model="student.studentInfos.file_number"
+                  v-model="student.file_number"
                   type="text"
                   placeholder="1234"
                   required
@@ -304,7 +304,7 @@
 
                 <b-form-input
                   id="job"
-                  v-model="student.studentInfos.job"
+                  v-model="student.job"
                   type="text"
                   placeholder=""
                   required
@@ -409,7 +409,7 @@ export default {
       this.student.outStudent();
 
       window.backend.Service.UpdateStudent(
-        this.student.studentInfos)
+        this.student)
         .then(
           data=>{
             this.data = data;

@@ -15,20 +15,20 @@
 
       </thead>
       <tbody>
-        <tr v-for="student in students" :key="student.studentInfos.id">
-          <td class="align-middle text-center">{{student.studentInfos.file_number}}</td>
+        <tr v-for="student in students" :key="student.id">
+          <td class="align-middle text-center">{{student.file_number}}</td>
           <td class="align-middle text-center">
-            {{student.studentInfos.last_name_fr | capitalize}}
+            {{student.last_name_fr | capitalize}}
           </td>
           <td class="align-middle text-center">
-            {{student.studentInfos.first_name_fr | capitalize}}
+            {{student.first_name_fr | capitalize}}
           </td>
           <td class="align-middle text-center">
-            {{student.studentInfos.registred_date}}
+            {{student.registred_date}}
           </td>
-          <td class="align-middle text-center">{{student.getExamName(student.studentInfos.next_exam)}}</td>
+          <td class="align-middle text-center">{{student.getExamName(student.next_exam)}}</td>
           <td class="align-middle text-center"><router-link class= "btn btn-danger" :to="{ name: 'studentDetails',
-          params: { id: student.studentInfos.id}}">infos</router-link></td>
+          params: { id: student.id}}">infos</router-link></td>
         </tr>
       </tbody>
     </table>
@@ -90,7 +90,7 @@ export default {
         data=>{
           this.data = data;
           for (var i = 0; i < data["students"].length; i++) {
-            let s = new Student(data["students"][0], null)
+            let s = new Student(data["students"][i], null)
             this.students.push(s);
           }
           this.studentsCount = data["count"];
