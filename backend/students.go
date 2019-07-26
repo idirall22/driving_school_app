@@ -18,19 +18,15 @@ func (s *Service) GetStudent(studentID uint,
 	}
 
 	tx := MainService.db.Begin()
-	tx.Find(&getStudentInfos.Student, "id=? OR last_name=?", studentID, lastName)
-	if err := tx.Find(&getStudentInfos.Exams, "id=?", studentID).
+	tx.Find(&getStudentInfos.
+		Student, "id=? OR last_name=?", studentID, lastName)
+
+	if err := tx.Find(&getStudentInfos.Exams, "student_id=?", studentID).
 		Error; err != nil {
 		return nil, err
 	}
 	tx.Commit()
 	return getStudentInfos, nil
-}
-
-// StudentsListOut model
-type StudentsListOut struct {
-	Students []*Student `json:"students"`
-	Count    uint       `json:"count"`
 }
 
 // GetStudents return a list of students,
@@ -57,6 +53,7 @@ func (s *Service) GetStudents(lastName, ordering string,
 		Error; err != nil {
 		return nil, err
 	}
+
 	return studentsListOut, nil
 }
 

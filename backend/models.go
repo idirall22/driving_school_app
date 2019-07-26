@@ -4,21 +4,22 @@ import (
 	"time"
 )
 
-var (
-	//ExamOne Highway code
-	ExamOne = "Highway code"
-
-	//ExamTwo Niche
-	ExamTwo = "Niche"
-
-	//ExamThree Circuit
-	ExamThree = "Circuit"
-)
-
 // GetStudentInfos model returned when request single student infos
 type GetStudentInfos struct {
 	Student *Student `json:"student"`
 	Exams   []*Exam  `json:"exams"`
+}
+
+// StudentsListOut model
+type StudentsListOut struct {
+	Students []*Student `json:"students"`
+	Count    uint       `json:"count"`
+}
+
+// ExamListsOut model
+type ExamListsOut struct {
+	ExamLists []*ExamList `json:"examLists"`
+	Count     uint        `json:"count"`
 }
 
 // MultiLanguageField model
@@ -47,7 +48,7 @@ type Student struct {
 	AddressStreet string     `gorm:"type:varchar(512)" json:"address_street,omitempty"`
 	RegistredDate time.Time  `json:"registred_date,omitempty"`
 	Image         string     `gorm:"default:'imageURL'" json:"image,omitempty"`
-	NextExam      string     `gorm:"default:'Highway code'" json:"next_exam,omitempty"`
+	NextExam      uint8      `gorm:"default:1" json:"next_exam,omitempty"`
 	LastExamDate  *time.Time `gorm:"index:last_exam_date" json:"last_exam_date,omitempty"`
 	Archived      bool       `json:"archived"`
 }
@@ -63,7 +64,7 @@ type Exam struct {
 	CreatedAt  time.Time  `sql:"DEFAULT:current_timestamp" json:"created_at,omitempty"`
 	UpdatedAt  time.Time  `json:"updated_at,omitempty"`
 	DeletedAt  *time.Time `sql:"index"`
-	ExamName   string     `json:"exam,omitempty"`
+	Exam       uint8      `json:"exam,omitempty"`
 	DateExam   time.Time  `json:"date_exam,omitempty"`
 	Status     bool       `gorm:"default:false" json:"status,omitempty"`
 	StudentID  uint       `json:"student_id,omitempty"`

@@ -17,6 +17,7 @@ func TestMain(t *testing.T) {
 	t.Run("updateExamList", testUpdateExamList)
 
 	t.Run("getStudent", testGetStudent)
+
 	t.Run("deleteExamList", testDeleteExamList)
 	t.Run("deleteStudents", testDeleteStudent)
 

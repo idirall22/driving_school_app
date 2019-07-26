@@ -127,7 +127,10 @@ func testUpdateExamList(t *testing.T) {
 	}
 	if examListUpdated != nil {
 		if len(examListUpdated.StudentsExams) != testStudentsCount {
-			t.Errorf("There is an error the length should be %d", testStudentsCount)
+			t.Errorf("There is an error the length should be %d but found %d",
+				testStudentsCount,
+				len(examListUpdated.StudentsExams),
+			)
 		}
 	}
 }
