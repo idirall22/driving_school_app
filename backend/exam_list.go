@@ -2,7 +2,6 @@ package service
 
 import (
 	"encoding/json"
-	"log"
 	"strconv"
 	"time"
 
@@ -12,73 +11,25 @@ import (
 var timeFormat = time.RFC3339
 
 // CreateExamList create an exam list
-func (s *Service) CreateExamList(date, examiner string,
-	studentsList []interface{}) (*ExamList, error) {
+func (s *Service) CreateExamList(examListMap map[string]interface{}) (uint, error) {
 
-	// Marshal an unmarshal the list interface into a list of students
-	students := []*Student{}
-
-	// Check if length > 0
-	if len(studentsList) > 0 {
-		data, err := json.Marshal(studentsList)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if err := json.Unmarshal(data, &students); err != nil {
-			return nil, err
-		}
-	}
-
-	// Chek if there is a name for examiner
-	if examiner == "" {
-		examiner = "No Name"
-	}
-
-	// Parse exam date
-	dateTime, err := time.Parse(timeFormat, date)
+	// Get examList model from json
+	examList, err := getExamListModelFromMap(examListMap)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	// Create an exam instance
-	examList := &ExamList{
-		DateExam: dateTime,
-		Examiner: examiner,
-		Archived: false,
+	// Begin tx
+	tx := MainService.db.Begin()
+
+	if err := tx.Create(&examList).
+		Error; err != nil {
+		tx.Rollback()
+		return 0, err
 	}
 
-	if err := MainService.db.Create(&examList).Error; err != nil {
-		return nil, err
-	}
-
-	if len(students) > 0 {
-		query := `INSERT INTO exams (
-			exam,
-			date_exam,
-			status,
-			student_id,
-			exam_list_id
-			)Values(
-				?,?,?,?,?
-				);`
-
-		tx := MainService.db.Begin()
-		for i := 0; i < len(students); i++ {
-			if err := tx.Exec(query,
-				students[i].NextExam,
-				examList.DateExam,
-				false,
-				students[i].ID,
-				examList.ID,
-			).Error; err != nil {
-				return nil, err
-			}
-		}
-		tx.Commit()
-	}
-
-	return examList, nil
+	tx.Commit()
+	return examList.ID, nil
 }
 
 // GetExamList get an exam list by id
@@ -90,12 +41,14 @@ func (s *Service) GetExamList(id uint) (*ExamList, error) {
 	if err := tx.Find(&examList, "id=?", id).
 		Related(&examList.StudentsExams, "StudentsExams").
 		Error; err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
 	for i := 0; i < len(examList.StudentsExams); i++ {
 		if err := tx.Find(&examList.StudentsExams[i].Student, "id=?",
 			examList.StudentsExams[i].StudentID).Error; err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 	}
@@ -107,109 +60,82 @@ func (s *Service) GetExamList(id uint) (*ExamList, error) {
 func (s *Service) GetExamLists(limit, offset uint) (*ExamListsOut, error) {
 	examListsOut := &ExamListsOut{}
 
-	if err := MainService.db.
+	tx := MainService.db.Begin()
+	if err := tx.
 		Model(&ExamList{}).
 		Order("date_exam desc").
 		Count(&examListsOut.Count).
 		Limit(limit).Offset(offset).
 		Find(&examListsOut.ExamLists).
 		Error; err != nil {
+		tx.Rollback()
 		return nil, err
 	}
-
+	tx.Commit()
 	return examListsOut, nil
 }
 
 // UpdateExamList update an exam list
-func (s *Service) UpdateExamList(examListID uint, date, examiner string,
-	exams []interface{}, studentsList []interface{}) (*ExamList, error) {
+func (s *Service) UpdateExamList(examListMap map[string]interface{},
+	examListToDelete []uint) (*ExamList, error) {
 
-	// Parse exam date
-	dateParsed, errParse := time.Parse(timeFormat, date)
-	if errParse != nil {
-		return nil, errParse
-	}
-
-	newStudentsExams := []*Exam{}
-	tx := MainService.db.Begin()
-
-	// Check if there are new students added to pass exam
-	if len(studentsList) > 0 {
-		students := []*Student{}
-		data, err := json.Marshal(studentsList)
-		if err != nil {
-			return nil, err
-		}
-		if err := json.Unmarshal(data, &students); err != nil {
-			return nil, err
-		}
-		for i := 0; i < len(students); i++ {
-			exam := &Exam{
-				Exam:       students[i].NextExam,
-				DateExam:   dateParsed,
-				StudentID:  students[i].ID,
-				Student:    *students[i],
-				ExamListID: examListID,
-			}
-			if err := tx.Create(&exam).Error; err != nil {
-				return nil, err
-			}
-			newStudentsExams = append(newStudentsExams, exam)
-		}
-	}
-
-	// Check if the examiner name is empty
-	if examiner == "" {
-		examiner = "No name"
-	}
-
-	// Create an examList object
-	examList := &ExamList{
-		ID:       examListID,
-		Examiner: examiner,
-		DateExam: dateParsed,
-	}
-
-	// Check if there are students in exams list
-	if len(exams) > 0 {
-		data, err := json.Marshal(exams)
-		if err != nil {
-			return nil, err
-		}
-		if err := json.Unmarshal(data, &examList.StudentsExams); err != nil {
-			return nil, err
-		}
-	}
-
-	// Append the two exams slices
-	examList.StudentsExams = append(examList.StudentsExams, newStudentsExams...)
-
-	for i := 0; i < len(examList.StudentsExams); i++ {
-		student := &Student{}
-		if err := tx.
-			Find(&student, "id=?", examList.StudentsExams[i].StudentID).
-			UpdateColumn("next_exam", examList.StudentsExams[i].Exam+1).
-			Error; err != nil {
-			return nil, err
-		}
-	}
-	// Delete All Exams Before add new ones
-	examsToDelete := []Exam{}
-	if err := tx.Find(&examsToDelete, "exam_list_id=?", examList.ID).
-		Unscoped().Delete(&examsToDelete).Error; err != nil {
+	examList, err := getExamListModelFromMap(examListMap)
+	if err != nil {
 		return nil, err
 	}
+	tx := MainService.db.Begin()
 
-	// Update exam list an replace associated exams
-	if err := tx.Save(&examList).
+	// Check if the examList was archived and update student
+	// next_exam and last_exam_date
+	if examList.Archived {
+		for i := 0; i < len(examList.StudentsExams); i++ {
+			student := &Student{}
+			if err := tx.
+				Find(&student, "id=?", examList.StudentsExams[i].StudentID).
+				UpdateColumns(Student{
+					NextExam: setNextExam(examList.DateExam,
+						student.LastExamDate,
+						student.LastExamStatus,
+						examList.StudentsExams[i].Status,
+						student.NextExam,
+					),
+					LastExamStatus: examList.StudentsExams[i].Status,
+					LastExamDate:   &examList.DateExam,
+				}).
+				Error; err != nil {
+				tx.Rollback()
+
+				return nil, err
+			}
+		}
+	}
+
+	// Create exam model to by id provaided to delete them
+	oldExams := []*Exam{}
+	if len(examListToDelete) > 0 {
+		for i := 0; i < len(examListToDelete); i++ {
+			exam := Exam{ID: examListToDelete[i]}
+			oldExams = append(oldExams, &exam)
+		}
+		if err := tx.Find(&oldExams, "exam_list_id=?", examList.ID).
+			Unscoped().
+			Delete(&examList.StudentsExams).
+			Error; err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	// Update examList and associated exams
+	if errS := tx.
+		Save(&examList).
 		Association("StudentsExams").
 		Replace(examList.StudentsExams).
 		Error; err != nil {
-		return nil, err
+		tx.Rollback()
+		return nil, errS
 	}
-
 	tx.Commit()
-
 	return examList, nil
 }
 
@@ -222,13 +148,11 @@ func (s *Service) DeleteExamList(id uint) error {
 		Unscoped().Delete(&examList).
 		Unscoped().Delete(&examList.StudentsExams)
 	err := tx.Commit().Error
-	return err
-}
-
-// ArchiveExamList archive or an archive examList
-func (s *Service) ArchiveExamList(id uint, archived bool) error {
-	return MainService.db.Model(&ExamList{}).Where("id=?", id).
-		UpdateColumn("archived", archived).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return nil
 }
 
 // ExportExamListPDF allows to export an exam list as pdf

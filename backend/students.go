@@ -1,30 +1,41 @@
 package service
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
-// GetStudent return a single student by provaiding id or lastName
+// GetStudent return a single student by id, lastName or phoneNumber
 func (s *Service) GetStudent(studentID uint,
-	lastName string) (*GetStudentInfos, error) {
+	lastName, phoneNumber string) (*GetStudentInfos, error) {
+
+	// If multiple parametters provaided the id will be the main
+	// parametter for searching
+	// searching priority: 1: id, 2: lastName, 3: phoneNumber
+	if studentID == 0 {
+		if lastName != "" && phoneNumber != "" {
+			phoneNumber = ""
+		}
+	} else {
+		phoneNumber = ""
+		lastName = ""
+	}
+
 	getStudentInfos := &GetStudentInfos{
 		Student: &Student{},
 		Exams:   []*Exam{},
 	}
 
-	if studentID != 0 && lastName != "" {
-		lastName = ""
-	}
-
+	// Begin tx
 	tx := MainService.db.Begin()
-	tx.Find(&getStudentInfos.
-		Student, "id=? OR last_name=?", studentID, lastName)
-
-	if err := tx.Find(&getStudentInfos.Exams, "student_id=?", studentID).
+	if err := tx.Find(&getStudentInfos.Student,
+		"id=? OR last_name=? OR phone_number=?",
+		studentID, lastName, phoneNumber).
+		Related(&getStudentInfos.Exams).
 		Error; err != nil {
+		tx.Rollback()
 		return nil, err
 	}
+
 	tx.Commit()
 	return getStudentInfos, nil
 }
@@ -58,15 +69,11 @@ func (s *Service) GetStudents(lastName, ordering string,
 }
 
 //CreateStudent create a student from a map
-func (s *Service) CreateStudent(studentInfo map[string]interface{}) (uint, error) {
+func (s *Service) CreateStudent(studentMap map[string]interface{}) (uint, error) {
 
-	student := &Student{}
-	data, err := json.Marshal(studentInfo)
+	student, err := getStudentModelFromMap(studentMap)
 	if err != nil {
-		return 0, err
-	}
-	if err := json.Unmarshal(data, &student); err != nil {
-		return 0, err
+		return 0, nil
 	}
 	if err := MainService.db.Create(&student).Error; err != nil {
 		return 0, err
@@ -75,21 +82,21 @@ func (s *Service) CreateStudent(studentInfo map[string]interface{}) (uint, error
 }
 
 // UpdateStudent update a student
-func (s *Service) UpdateStudent(studentUpdate map[string]interface{}) (uint, error) {
-	data, err := json.Marshal(studentUpdate)
+func (s *Service) UpdateStudent(studentMap map[string]interface{}) (int64, error) {
+
+	student, err := getStudentModelFromMap(studentMap)
 	if err != nil {
 		return 0, err
 	}
-	student := &Student{}
-	if err := json.Unmarshal(data, &student); err != nil {
-		return 0, err
-	}
-	dbRes := MainService.db.Save(&student)
 
-	if dbRes.Error != nil {
-		return 0, dbRes.Error
+	db := MainService.db.
+		Model(&Student{}).
+		Updates(&student)
+
+	if db.Error != nil {
+		return 0, db.Error
 	}
-	return uint(dbRes.RowsAffected), nil
+	return db.RowsAffected, nil
 }
 
 // DeleteStudent update a student

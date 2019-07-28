@@ -27,32 +27,6 @@ func CreateDatabaseDirFile(directory, fileName string) error {
 func InitService(db *gorm.DB) {
 	MainService.db = db
 	MainService.db.AutoMigrate(&Student{}, &Exam{}, &ExamList{})
-	// 	var dummyStudent = &Student{
-	// 		FileNumber:    "0001",
-	// 		FirstName:     "idir",
-	// 		LastName:      "makhlouf",
-	// 		MaidenName:    " ",
-	// 		PhoneNumber:   "0557083719",
-	// 		Job:           "devloper",
-	// 		BirthDay:      time.Now(),
-	// 		Gender:        "Male",
-	// 		City:          "Oran",
-	// 		AddressStreet: "1273 oran street",
-	// 		RegistredDate: time.Now(),
-	// 		Image:         "image.png",
-	// 		Exams: []*Exam{{
-	// 			ExamName: "01",
-	// 			Comment:  "no comment",
-	// 			DateExam: time.Now(),
-	// 			Status:   false},
-	// 			{
-	// 				ExamName: "02",
-	// 				Comment:  "no comment 2",
-	// 				DateExam: time.Now(),
-	// 				Status:   true},
-	// 		},
-	// 	}
-	// 	MainService.CreateStudent(dummyStudent)
 }
 
 //CloseService close database connection

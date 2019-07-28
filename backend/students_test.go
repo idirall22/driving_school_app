@@ -2,7 +2,6 @@ package service
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"strconv"
 	"testing"
@@ -31,10 +30,12 @@ var dummyStudent = &Student{
 	FileNumber:    "0001",
 	FirstName:     "idir",
 	LastName:      `"fr":"makhlouf", "ar": "مخلوف"`,
-	MaidenName:    " ",
-	PhoneNumber:   "0557083719",
+	MaidenName:    "none",
+	PhoneNumber:   "05-57-08-37-19",
 	Job:           "devloper",
 	BirthDay:      time.Now(),
+	Country:       "Algeria",
+	Department:    "Oran",
 	Gender:        "Male",
 	City:          "Oran",
 	AddressStreet: "1273 oran street",
@@ -43,9 +44,9 @@ var dummyStudent = &Student{
 
 // Test GetStudent
 func testGetStudent(t *testing.T) {
-	getStudentInfos, err := MainService.GetStudent(1, "")
+	getStudentInfos, err := MainService.GetStudent(1, "", "")
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 	if getStudentInfos.Student.ID != 1 {
 		t.Error("There is an error the ids does not match")
@@ -107,12 +108,11 @@ func testUpdateStudent(t *testing.T) {
 	}
 	m["id"] = 1
 	m["first_name"] = "updated"
-	m["exams"] = nil
 	id, err := MainService.UpdateStudent(m)
 	if err != nil {
 		t.Error("There is an error the student was not updated")
 	}
-	getStudentInfos, err := MainService.GetStudent(1, "")
+	getStudentInfos, err := MainService.GetStudent(1, "", "")
 	if err != nil {
 		t.Error("There is an error can not get student")
 	}
