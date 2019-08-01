@@ -7,18 +7,18 @@ func TestMain(t *testing.T) {
 	t.Run("createDatabaseFile", testCreateDatabaseFile)
 
 	t.Run("createStudent", testCreateStudent)
-	t.Run("getStudents", testGetStudents)
-	t.Run("updateStudents", testUpdateStudent)
 
 	t.Run("createExamList", testCreateExamList)
 	t.Run("getExamList", testGetExamList)
 	t.Run("getExamLists", testGetExamLists)
 	t.Run("updateExamList", testUpdateExamList)
 	t.Run("getStudent", testGetStudent)
-
+	t.Run("getStudents", testGetStudents)
+	t.Run("updateStudents", testUpdateStudent)
+	//
 	t.Run("deleteExamList", testDeleteExamList)
 	t.Run("deleteStudents", testDeleteStudent)
-
+	//
 	t.Run("cleanedDatabase", testCleanedDatabase)
 	t.Run("clean", testCleanDatabaseTestFilesAndDirectory)
 }
