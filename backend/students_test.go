@@ -2,8 +2,9 @@ package service
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
-	"strconv"
+	"os"
 	"testing"
 	"time"
 
@@ -11,7 +12,28 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type m map[string]interface{}
+type arrayMap []m
+
+var students = arrayMap{}
+
+func openJSONStudentFile() arrayMap {
+	fileName := "students_test.json"
+	data, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		log.Printf("Could not open %s file.\n", fileName)
+		os.Exit(1)
+	}
+	a := arrayMap{}
+	if err := json.Unmarshal(data, &a); err != nil {
+		log.Fatal(err)
+	}
+	return a
+}
+
 func connectDatabse() {
+	students = openJSONStudentFile()
+
 	db, err := gorm.Open("sqlite3", "db/db.sqlite3")
 	if err != nil {
 		log.Println("Error to connect database")
@@ -29,9 +51,9 @@ var testStudentsCount = 5
 var dummyStudent = &Student{
 	FileNumber:    "0001",
 	FirstName:     "idir",
-	LastName:      `"fr":"makhlouf", "ar": "مخلوف"`,
+	LastName:      `"fr":"lastname", "ar": "lastname"`,
 	MaidenName:    "none",
-	PhoneNumber:   "05-57-08-37-19",
+	PhoneNumber:   "0000000000",
 	Job:           "devloper",
 	BirthDay:      time.Now(),
 	Country:       "Algeria",
@@ -42,98 +64,158 @@ var dummyStudent = &Student{
 	RegistredDate: time.Now(),
 }
 
-// Test GetStudent
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+// Test GetStudent /////////////////////////////////////////
 func testGetStudent(t *testing.T) {
-	getStudentInfos, err := MainService.GetStudent(1, "", "")
-	if err != nil {
-		log.Fatal(err)
-	}
-	if getStudentInfos.Student.ID != 1 {
-		t.Error("There is an error the ids does not match")
-	}
-}
 
-// Test GetStudents
-func testGetStudents(t *testing.T) {
-	studentsListOut, _ := MainService.GetStudents("", "", 10, 0)
-	if studentsListOut.Students[0].FirstName != dummyStudent.FirstName {
-		t.Error("There is an error the first name does not match")
+	dataTest := []struct {
+		id          uint
+		lastName    string
+		phoneNumber string
+	}{
+		// Test 0 when we provaid id only
+		{1, "", ""},
+		// Test 1 when we provaid lastName
+		{0, "polo", ""},
+		// Test 2 when we provaid lastName ans phoneNumber the priority is
+		// for lastName
+		{0, "polo", "0000000000"},
+		// Test 3 when we provaid phoneNumber
+		{0, "", "0000000000"},
 	}
-
-	studentsListOut, _ = MainService.GetStudents(dummyStudent.LastName, "", 10, 0)
-	if len(studentsListOut.Students) != testStudentsCount {
-		t.Error("There is an error the first name does not match")
-	}
-}
-
-// Test create student
-func testCreateStudent(t *testing.T) {
-	// Connect to database test
-	connectDatabse()
-
-	m := make(map[string]interface{})
-	data, err := json.Marshal(dummyStudent)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if err := json.Unmarshal(data, &m); err != nil {
-		t.Error(err)
-	}
-
-	for i := 1; i <= testStudentsCount; i++ {
-		m["file_number"] = "00" + strconv.Itoa(i)
-		id, err := MainService.CreateStudent(m)
+	for i := 0; i < len(dataTest); i++ {
+		getStudentInfos, err := MainService.
+			GetStudent(dataTest[i].id, dataTest[i].lastName, dataTest[i].phoneNumber)
 		if err != nil {
-			t.Error("There is an error student was not created")
-		}
-		if dummyStudent != nil {
-			dummyStudent.ID = id
-			if id != uint(i) {
-				t.Error("There is an error, ids does not match")
+			log.Fatal(err)
+			switch i {
+			case 0:
+				if getStudentInfos.Student.ID != dataTest[i].id {
+					t.Errorf("There is an error, the ids does not match should found %d but got %d",
+						dataTest[i].id, getStudentInfos.Student.ID)
+				}
+				break
+			case 1:
+				if getStudentInfos.Student.LastName != dataTest[i].lastName {
+					t.Error("There is an error the last name does not match")
+				}
+				break
+			case 2:
+				if getStudentInfos.Student.LastName != dataTest[i].lastName {
+					t.Error("There is an error the last name does not match")
+				}
+				break
+			case 3:
+				if getStudentInfos.Student.LastName != dataTest[i].phoneNumber {
+					t.Error("There is an error the phone number does not match")
+				}
+				break
 			}
 		}
 	}
 }
 
-// Test update student
-func testUpdateStudent(t *testing.T) {
-	m := make(map[string]interface{})
-	data, err := json.Marshal(dummyStudent)
-	if err != nil {
-		t.Error(err)
-	}
-	if err := json.Unmarshal(data, &m); err != nil {
-		t.Error(err)
-	}
-	m["id"] = 1
-	m["first_name"] = "updated"
-	id, err := MainService.UpdateStudent(m)
-	if err != nil {
-		t.Error("There is an error the student was not updated")
-	}
-	getStudentInfos, err := MainService.GetStudent(1, "", "")
-	if err != nil {
-		t.Error("There is an error can not get student")
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+// Test GetStudents ////////////////////////////////////////
+func testGetStudents(t *testing.T) {
+	dataTest := []struct {
+		lastName string
+		ordering string
+		limit    uint
+		offset   uint
+	}{
+		// Test 0 get a list of students
+		{"", "", 10, 0},
+		// Test 1 get a list of students who should match lastName
+		// provaided
+		{"polo", "", 10, 0},
+		// Test 2 this should return one student with id 2
+		{"", "", 10, 1},
 	}
 
-	if getStudentInfos.Student != nil {
-		if getStudentInfos.Student.FirstName != m["first_name"] && id != 1 {
-			t.Error("There is an error with the student who was updated")
+	for i := 0; i < len(dataTest); i++ {
+		studentsListOut, err := MainService.
+			GetStudents(dataTest[i].lastName, dataTest[i].ordering,
+				dataTest[i].limit, dataTest[i].offset)
+		if err != nil {
+			t.Error(err)
+		}
+		switch i {
+		case 0:
+			if len(studentsListOut.Students) != int(dataTest[i].limit) {
+				t.Errorf("There is an error count does not match should be %d but got %d",
+					dataTest[i].limit, len(studentsListOut.Students))
+			}
+		case 1:
+			if studentsListOut.Students[0].LastName != students[0]["last_name"] {
+				t.Error("There is an error the first name does not match")
+			}
+			break
+		case 2:
+			if len(studentsListOut.Students) != int(dataTest[i].limit) {
+				t.Errorf("There is an error count does not match should be %d but got %d",
+					dataTest[i].limit-dataTest[i].offset, len(studentsListOut.Students))
+			}
 		}
 	}
 }
 
-// Test delete student
-func testDeleteStudent(t *testing.T) {
-	for i := 1; i <= testStudentsCount; i++ {
-		err := MainService.DeleteStudent(uint(i))
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+// Test create student /////////////////////////////////////
+func testCreateStudent(t *testing.T) {
+	// Connect to database test
+	connectDatabse()
+
+	for i := 0; i < len(students); i++ {
+		_, err := MainService.CreateStudent(students[i])
 		if err != nil {
+			t.Error("There is an error student was not created")
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+// Test update student /////////////////////////////////////
+func testUpdateStudent(t *testing.T) {
+	var studentUpdated = make(map[string]interface{})
+	for key, value := range students[0] {
+		studentUpdated[key] = value
+	}
+	studentUpdated["id"] = 1
+	studentUpdated["last_name"] = "super polo"
+	studentUpdated["file_number"] = "200"
+
+	student, err := MainService.UpdateStudent(studentUpdated)
+	if err != nil {
+		t.Fatal("There is an error the student was not updated")
+	}
+	if student.LastName != studentUpdated["last_name"] {
+		t.Error("There is an error the student last name was not updated")
+	}
+	if student.FileNumber != studentUpdated["file_number"] {
+		t.Error("There is an error the student file number was not updated")
+	}
+}
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+// Test delete student /////////////////////////////////////
+func testDeleteStudent(t *testing.T) {
+	for i := 0; i < len(students); i++ {
+		if err := MainService.DeleteStudent(uint(i)); err != nil {
 			t.Error(err)
 		}
 	}
 	studentsListOut, err := MainService.GetStudents("", "", 10, 0)
-
 	if err != nil {
 		t.Error(err)
 	}
