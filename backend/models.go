@@ -30,28 +30,25 @@ type MultiLanguageField struct {
 
 //Student model
 type Student struct {
-	ID             uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt      time.Time  `sql:"DEFAULT:current_timestamp" json:"created_at,omitempty"`
-	UpdatedAt      time.Time  `json:"updated_at,omitempty"`
-	DeletedAt      *time.Time `sql:"index"`
-	FileNumber     string     `gorm:"unique" json:"file_number,omitempty"`
-	FirstName      string     `gorm:"type:varchar(512)" json:"first_name,omitempty"`
-	LastName       string     `gorm:"type:varchar(512);index:last_name" json:"last_name,omitempty"`
-	MaidenName     string     `gorm:"type:varchar(512)" json:"maiden_name,omitempty"`
-	PhoneNumber    string     `json:"phone_number,omitempty"`
-	Job            string     `json:"job,omitempty"`
-	BirthDay       time.Time  `json:"birthday,omitempty"`
-	Gender         string     `json:"gender,omitempty"`
-	Country        string     `json:"country,omitempty"`
-	City           string     `json:"city,omitempty"`
-	Department     string     `json:"department,omitempty"`
-	AddressStreet  string     `gorm:"type:varchar(512)" json:"address_street,omitempty"`
-	RegistredDate  time.Time  `json:"registred_date,omitempty"`
-	Image          string     `gorm:"default:'imageURL'" json:"image,omitempty"`
-	NextExam       uint8      `sql:"default:1" json:"next_exam"`
-	LastExamDate   *time.Time `gorm:"index:last_exam_date" json:"last_exam_date,omitempty"`
-	LastExamStatus bool       `json:"last_exam_status"`
-	Archived       bool       `json:"archived"`
+	ID            uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt     time.Time  `sql:"DEFAULT:current_timestamp" json:"created_at,omitempty"`
+	UpdatedAt     time.Time  `json:"updated_at,omitempty"`
+	DeletedAt     *time.Time `sql:"index"`
+	FileNumber    string     `gorm:"unique" json:"file_number,omitempty"`
+	FirstName     string     `gorm:"type:varchar(512)" json:"first_name,omitempty"`
+	LastName      string     `gorm:"type:varchar(512);index:last_name" json:"last_name,omitempty"`
+	MaidenName    string     `gorm:"type:varchar(512)" json:"maiden_name,omitempty"`
+	PhoneNumber   string     `json:"phone_number,omitempty"`
+	Job           string     `json:"job,omitempty"`
+	BirthDay      time.Time  `json:"birthday,omitempty"`
+	Gender        string     `json:"gender,omitempty"`
+	Country       string     `json:"country,omitempty"`
+	City          string     `json:"city,omitempty"`
+	Department    string     `json:"department,omitempty"`
+	AddressStreet string     `gorm:"type:varchar(512)" json:"address_street,omitempty"`
+	RegistredDate time.Time  `json:"registred_date,omitempty"`
+	Image         string     `gorm:"default:'imageURL'" json:"image,omitempty"`
+	Archived      bool       `json:"archived"`
 }
 
 // TableName :Database table name
