@@ -45,9 +45,6 @@ func connectDatabse() {
 	MainService.db.Model(&Student{})
 }
 
-// Number of student created on the tests
-var testStudentsCount = 5
-
 var dummyStudent = &Student{
 	FileNumber:    "0001",
 	FirstName:     "idir",
@@ -113,6 +110,9 @@ func testGetStudent(t *testing.T) {
 				}
 				break
 			}
+		}
+		if len(getStudentInfos.Exams) != 1 {
+			t.Error("There is an error the student is registred to pass an exam")
 		}
 	}
 }
@@ -219,7 +219,18 @@ func testDeleteStudent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	examsDBCount := 0
+	if err := MainService.db.Table("exams").Count(&examsDBCount).Error; err != nil {
+		t.Fatal(err)
+	}
+	if err != nil {
+		t.Error(err)
+	}
 	if len(studentsListOut.Students) != 0 {
-		t.Errorf("There is an error the length should be %d", testStudentsCount-1)
+		t.Errorf("There is an error the length should be %d", len(studentsListOut.Students))
+	}
+
+	if examsDBCount != 0 {
+		t.Errorf("There is an error the count should be zero but got %d", examsDBCount)
 	}
 }
