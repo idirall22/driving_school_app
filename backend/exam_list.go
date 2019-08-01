@@ -3,12 +3,9 @@ package service
 import (
 	"encoding/json"
 	"strconv"
-	"time"
 
 	"github.com/jung-kurt/gofpdf"
 )
-
-var timeFormat = time.RFC3339
 
 // CreateExamList create an exam list
 func (s *Service) CreateExamList(examListMap map[string]interface{}) (uint, error) {
@@ -77,7 +74,7 @@ func (s *Service) GetExamLists(limit, offset uint) (*ExamListsOut, error) {
 
 // UpdateExamList update an exam list
 func (s *Service) UpdateExamList(examListMap map[string]interface{},
-	examListToDelete []uint) (*ExamList, error) {
+	examListToDelete []interface{}) (*ExamList, error) {
 
 	examList, err := getExamListModelFromMap(examListMap)
 	if err != nil {
@@ -85,44 +82,21 @@ func (s *Service) UpdateExamList(examListMap map[string]interface{},
 	}
 	tx := MainService.db.Begin()
 
-	// Check if the examList was archived and update student
-	// next_exam and last_exam_date
-	if examList.Archived {
-		for i := 0; i < len(examList.StudentsExams); i++ {
-			student := &Student{}
-			if err := tx.
-				Find(&student, "id=?", examList.StudentsExams[i].StudentID).
-				UpdateColumns(Student{
-					NextExam: setNextExam(examList.DateExam,
-						student.LastExamDate,
-						student.LastExamStatus,
-						examList.StudentsExams[i].Status,
-						student.NextExam,
-					),
-					LastExamStatus: examList.StudentsExams[i].Status,
-					LastExamDate:   &examList.DateExam,
-				}).
+	// Create exam model to by id provaided to delete them
+	if examListToDelete != nil {
+		oldExams := []*Exam{}
+		if len(examListToDelete) > 0 {
+			for i := 0; i < len(examListToDelete); i++ {
+				exam := Exam{ID: uint(examListToDelete[i].(uint))}
+				oldExams = append(oldExams, &exam)
+			}
+			if err := tx.Find(&oldExams, "exam_list_id=?", examList.ID).
+				Unscoped().
+				Delete(&examList.StudentsExams).
 				Error; err != nil {
 				tx.Rollback()
-
 				return nil, err
 			}
-		}
-	}
-
-	// Create exam model to by id provaided to delete them
-	oldExams := []*Exam{}
-	if len(examListToDelete) > 0 {
-		for i := 0; i < len(examListToDelete); i++ {
-			exam := Exam{ID: examListToDelete[i]}
-			oldExams = append(oldExams, &exam)
-		}
-		if err := tx.Find(&oldExams, "exam_list_id=?", examList.ID).
-			Unscoped().
-			Delete(&examList.StudentsExams).
-			Error; err != nil {
-			tx.Rollback()
-			return nil, err
 		}
 	}
 
@@ -135,7 +109,10 @@ func (s *Service) UpdateExamList(examListMap map[string]interface{},
 		tx.Rollback()
 		return nil, errS
 	}
-	tx.Commit()
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
 	return examList, nil
 }
 
