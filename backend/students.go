@@ -15,6 +15,7 @@ func (s *Service) GetStudent(studentID uint,
 		if lastName != "" && phoneNumber != "" {
 			phoneNumber = ""
 		}
+
 	} else {
 		phoneNumber = ""
 		lastName = ""
@@ -28,8 +29,8 @@ func (s *Service) GetStudent(studentID uint,
 	// Begin tx
 	tx := MainService.db.Begin()
 	if err := tx.Find(&getStudentInfos.Student,
-		"id=? OR last_name=? OR phone_number=?",
-		studentID, lastName, phoneNumber).
+		"id=? OR last_name Like ? OR phone_number=?",
+		studentID, "%"+lastName+"%", phoneNumber).
 		Related(&getStudentInfos.Exams).
 		Error; err != nil {
 		tx.Rollback()
@@ -42,7 +43,7 @@ func (s *Service) GetStudent(studentID uint,
 
 // GetStudents return a list of students,
 func (s *Service) GetStudents(lastName, ordering string,
-	limit, offset int) (*StudentsListOut, error) {
+	limit, offset uint) (*StudentsListOut, error) {
 
 	defaultOrdering := "desc"
 	if ordering != "" {
@@ -64,7 +65,6 @@ func (s *Service) GetStudents(lastName, ordering string,
 		Error; err != nil {
 		return nil, err
 	}
-
 	return studentsListOut, nil
 }
 
@@ -82,27 +82,32 @@ func (s *Service) CreateStudent(studentMap map[string]interface{}) (uint, error)
 }
 
 // UpdateStudent update a student
-func (s *Service) UpdateStudent(studentMap map[string]interface{}) (int64, error) {
-
+func (s *Service) UpdateStudent(studentMap map[string]interface{}) (*Student, error) {
 	student, err := getStudentModelFromMap(studentMap)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	db := MainService.db.
+	if err := MainService.db.
 		Model(&Student{}).
-		Updates(&student)
-
-	if db.Error != nil {
-		return 0, db.Error
+		Updates(&student).Error; err != nil {
+		return nil, err
 	}
-	return db.RowsAffected, nil
+	return student, nil
 }
 
 // DeleteStudent update a student
 func (s *Service) DeleteStudent(id uint) error {
 	student := Student{ID: id}
-
-	err := MainService.db.Delete(&student).Error
+	tx := MainService.db.Begin()
+	tx.Delete(&student)
+	exams := []*Exam{}
+	err := tx.
+		Table("exams").
+		Where("student_id=?", id).
+		Unscoped().
+		Delete(&exams).
+		Error
+	tx.Commit()
 	return err
 }
