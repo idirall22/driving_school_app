@@ -34,3 +34,16 @@ func checkIfStudentIsValid(student *Student) bool {
 	}
 	return true
 }
+
+// return a map of a student from a struct provaided
+func getStudentMapFromModel(student Student) (map[string]interface{}, error) {
+	data, err := json.Marshal(&student)
+	if err != nil {
+		return nil, err
+	}
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(data, &m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
