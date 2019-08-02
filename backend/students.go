@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -11,7 +12,7 @@ func (s *Service) GetStudent(studentID uint,
 	// If multiple parametters provaided the id will be the main
 	// parametter for searching
 	// searching priority: 1: id, 2: lastName, 3: phoneNumber
-	if studentID == 0 {
+	if studentID <= 0 {
 		if lastName != "" && phoneNumber != "" {
 			phoneNumber = ""
 		}
@@ -28,6 +29,29 @@ func (s *Service) GetStudent(studentID uint,
 
 	// Begin tx
 	tx := MainService.db.Begin()
+
+	if studentID > 0 {
+		if err := tx.Find(&getStudentInfos.Student, "id=?", studentID).
+			Related(&getStudentInfos.Exams).Error; err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	} else if studentID <= 0 && lastName != "" {
+		if err := tx.Find(&getStudentInfos.Student, "last_name Like ?", "%"+lastName+"%").
+			Related(&getStudentInfos.Exams).Error; err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	} else if studentID <= 0 && lastName == "" && phoneNumber != "" {
+		if err := tx.Find(&getStudentInfos.Student, "phone_number = ?", phoneNumber).
+			Related(&getStudentInfos.Exams).Error; err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	} else {
+		tx.Rollback()
+		return nil, errors.New("Bad request")
+	}
 	if err := tx.Find(&getStudentInfos.Student,
 		"id=? OR last_name Like ? OR phone_number=?",
 		studentID, "%"+lastName+"%", phoneNumber).

@@ -4,6 +4,13 @@ import (
 	"time"
 )
 
+type m map[string]interface{}
+
+// slice of map
+type arrayMap []m
+
+var students = arrayMap{}
+
 // GetStudentInfos model returned when request single student infos
 type GetStudentInfos struct {
 	Student *Student `json:"student"`

@@ -1,6 +1,9 @@
 package service
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -34,4 +37,20 @@ func createDatabaseFile(databaseDir, databaseName string,
 		return err
 	}
 	return nil
+}
+
+func openJSONStudentFile(fileName string) arrayMap {
+	if fileName == "" {
+		fileName = "students_test.json"
+	}
+	data, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		log.Printf("Could not open %s file: %s.\n", fileName, err)
+		os.Exit(1)
+	}
+	a := arrayMap{}
+	if err := json.Unmarshal(data, &a); err != nil {
+		log.Fatal(err)
+	}
+	return a
 }

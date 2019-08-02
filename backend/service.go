@@ -1,6 +1,8 @@
 package service
 
 import (
+	"log"
+
 	"github.com/jinzhu/gorm"
 )
 
@@ -8,6 +10,9 @@ import (
 type Service struct {
 	db *gorm.DB
 }
+
+// test mode
+var testMode = true
 
 // MainService model
 var MainService = &Service{}
@@ -26,7 +31,20 @@ func CreateDatabaseDirFile(directory, fileName string) error {
 // InitService init the service
 func InitService(db *gorm.DB) {
 	MainService.db = db
+	if testMode == true {
+		MainService.db.DropTableIfExists(&Student{}, &Exam{}, &ExamList{})
+	}
 	MainService.db.AutoMigrate(&Student{}, &Exam{}, &ExamList{})
+
+	students := openJSONStudentFile("backend/students_test.json")
+
+	for i := 0; i < len(students); i++ {
+		_, err := MainService.CreateStudent(students[i])
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 }
 
 //CloseService close database connection

@@ -1,10 +1,7 @@
 package service
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
-	"os"
 	"testing"
 	"time"
 
@@ -12,27 +9,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type m map[string]interface{}
-type arrayMap []m
-
-var students = arrayMap{}
-
-func openJSONStudentFile() arrayMap {
-	fileName := "students_test.json"
-	data, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		log.Printf("Could not open %s file.\n", fileName)
-		os.Exit(1)
-	}
-	a := arrayMap{}
-	if err := json.Unmarshal(data, &a); err != nil {
-		log.Fatal(err)
-	}
-	return a
-}
-
 func connectDatabse() {
-	students = openJSONStudentFile()
+	students = openJSONStudentFile("")
 
 	db, err := gorm.Open("sqlite3", "db/db.sqlite3")
 	if err != nil {
@@ -78,15 +56,15 @@ func testGetStudent(t *testing.T) {
 		{0, "polo", ""},
 		// Test 2 when we provaid lastName ans phoneNumber the priority is
 		// for lastName
-		{0, "polo", "0000000000"},
+		{0, "polo", "0101010101"},
 		// Test 3 when we provaid phoneNumber
-		{0, "", "0000000000"},
+		{0, "", "0101010101"},
 	}
 	for i := 0; i < len(dataTest); i++ {
 		getStudentInfos, err := MainService.
 			GetStudent(dataTest[i].id, dataTest[i].lastName, dataTest[i].phoneNumber)
 		if err != nil {
-			log.Fatal(err)
+			t.Fatal(i, err)
 			switch i {
 			case 0:
 				if getStudentInfos.Student.ID != dataTest[i].id {
