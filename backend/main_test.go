@@ -18,6 +18,9 @@ func TestMain(t *testing.T) {
 	t.Run("updateExamList", testUpdateExamList)
 	t.Run("updateStudents", testUpdateStudent)
 
+	t.Run("analyticsGetWinLicence", testGetWinLicencePerYear)
+	t.Run("analyticsGetWinExams", testGetExamsResults)
+
 	t.Run("deleteExamList", testDeleteExamList)
 	t.Run("deleteStudents", testDeleteStudent)
 
