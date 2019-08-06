@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import Dashboard from '@/components/Dashboard.vue'
 import ListStudents from '@/components/ListStudents.vue'
 import AddStudents from '@/components/AddStudent.vue'
 import AddExamList from '@/components/AddExamList.vue'
@@ -27,6 +28,7 @@ Vue.filter("moment2",date => moment(date).format('DD-MM-YYYY'))
 export default new Router({
   linkExactActiveClass: 'active',
   routes:[
+    {path: "/", name: "dashboard",component: Dashboard},
     {path: "/students/", name: "listStudents",component: ListStudents},
     {path: "/add-student", name: "addStudent",component: AddStudents},
     {path: "/students/:id", name: "studentDetails",component: StudentDetails},

@@ -8,6 +8,7 @@
      @dismissed="closeAlert()">
      {{alertMessage}}
    </b-alert>
+
    <Header initTitle="Liste d'examen"></Header>
 
    <div class="mb-3 d-flex justify-content-between">
@@ -17,16 +18,16 @@
           @click="deleteExamList"
           type="button">Suprimer la liste
         </button>
-        <b-button v-if="!examList.archived && checkIfExamListCanBeArchived()"
+        <b-button v-if="!examList.archived" :disabled="checkIfCanBeArchived()"
           class="ml-2 btn btn-success"
-          @click="archiveExamList()"
+          @click="examList.archived=!examList.archived"
           type="button">Archivé
         </b-button>
-        <button v-else-if = "!examList.archived && checkIfExamListCanBeArchived()"
-          class="ml-2 btn btn-warning"
-          @click="archiveExamList()"
-          type="button">Modifier
-        </button>
+        <b-button v-if="examList.archived" :disabled="checkIfCanBeArchived()"
+          class="btn btn-success"
+          @click="examList.archived=!examList.archived"
+          type="button">Déarchivé
+        </b-button>
       </div>
       <div class="">
         <button
@@ -37,13 +38,10 @@
       </div>
    </div>
 
-
-
-
    <b-form @submit="updateExamList">
      <!-- Examiner Name -->
      <b-form-group id="examinerName"
-       label="Cherché des étudiants:" label-for="examinerName">
+       label="Nom et Prénom de L'éxaminateur:" label-for="examinerName">
        <b-form-input
          id="examinerName"
          v-model="examList.examiner"
@@ -53,6 +51,7 @@
        </b-form-input>
      </b-form-group>
      <!-- End examiner Name -->
+
      <!-- Exam date -->
        <b-form-group id="examDate"
          label="Date d'examen:" label-for="examDate">
@@ -69,13 +68,12 @@
        </b-form-group>
      <!-- end exam Date -->
 
-     <SearchStudent
+     <SearchStudent v-if="!examList.archived" class="mb-3"
        ref="search"
-       :students="students">
+       v-on:studentAdded= "createStudentExam($event)"
+       >
      </SearchStudent>
 
-     <br>
-     <br>
      <!-- array students -->
      <div class="table-responsive">
        <table class="table table-striped table-sm">
@@ -88,66 +86,46 @@
              <th class="align-middle text-center">Cat</th>
              <th class="align-middle text-center">Examen</th>
              <th class="align-middle text-center">Résultat</th>
-             <th v-if="!examList.archived" class="align-middle text-center">Retirer</th>
+             <th
+               v-if="!examList.archived"
+               class="align-middle text-center">Retirer
+             </th>
            </tr>
          </thead>
          <tbody>
-           <tr class="exams border-success" v-for="(exam, index) in examList.students_exams"
-              :key="exam.student.id">
+           <tr class="exams border-success"
+               v-for="(exam, index) in examList.students_exams"
+               :key="exam.student_id">
 
              <td class="align-middle text-center">{{index+1}}</td>
              <td class="align-middle text-center">
                {{exam.student.file_number}}
              </td>
              <td class="align-middle text-center">
-               {{exam.student.last_name_fr | capitalize}}
-               {{exam.student.first_name_fr | capitalize}}
+               {{exam.student.last_name_fr }}
+               {{exam.student.first_name_fr}}
              </td>
              <td class="align-middle text-center">
                {{exam.student.birthday}}
              </td>
              <td class="align-middle text-center">B</td>
              <td class="align-middle text-center">
-               {{exam.student.getExamName(exam.student.next_exam)}}
+               {{exam.student.getExamName(exam.exam)}}
              </td>
-             <td class="align-middle text-center">
+             <td v-if="examList.archived"
+                  class="align-middle text-center"
+             >
+              {{getStatus(exam.status)}}
+             </td>
+             <td v-if="!examList.archived"
+                  class="align-middle text-center">
                <b-form-checkbox
-                  id="status-checkbox"
                   v-model="exam.status"
                 ></b-form-checkbox>
               </td>
-             <td class="align-middle text-center">
-               <button @click.prevent="removeStudentFromStudentsExams(index)"
-                 type="button" class="form-control close"
-                 data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </td>
-           </tr>
-           <tr class="students border-warning" v-for="(student, index) in students" :key="student.id">
-             <td class="align-middle text-center">{{index+1}}</td>
-             <td class="align-middle text-center">
-               {{student.file_number}}
-             </td>
-             <td class="align-middle text-center">
-               {{student.last_name_fr | capitalize}}
-               {{student.first_name_fr | capitalize}}
-             </td>
-             <td class="align-middle text-center">
-               {{student.birthday}}
-             </td>
-             <td class="align-middle text-center">B</td>
-             <td class="align-middle text-center">
-               {{student.next_exam}}
-             </td>
-             <td class="align-middle text-center">
-               <b-form-checkbox
-                  id="status"
-                  name="status"
-                ></b-form-checkbox>
-            </td>
-             <td class="align-middle text-center">
-               <button @click.prevent="removeStudentAdded(student.id)"
+              <td v-if="examList.archived"></td>
+             <td v-if="!examList.archived" class="align-middle text-center">
+               <button @click.prevent="removeStudentFromStudentsExams(exam.id, index)"
                  type="button" class="form-control close"
                  data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -157,7 +135,6 @@
          </tbody>
        </table>
        <b-button
-         :disabled="examList.archived"
          block type="submit"
          variant="primary">
          Modifier la liste d'éxamen
@@ -171,6 +148,7 @@
 import VueBootstrapDatetimepicker from 'vue-bootstrap-datetimepicker';
 // import Student from './service/student.js';
 import ExamList from './service/examList.js';
+import Exam from './service/exam.js';
 import {ExamListMessages} from './service/messages.js';
 import Header from './parts/Header';
 import SearchStudent from './parts/SearchStudent';
@@ -201,9 +179,8 @@ export default {
 
     id: 0,
     examList: {},
-    students: [],
     errPDF: null,
-
+    studentsExamsRemovedIds: [],
     options:{
       format:"DD-MM-YYYY",
       useCurrent: false
@@ -217,7 +194,10 @@ export default {
       this.errorArchive = null;
       this.errorDelete = null;
     },
-
+    createStudentExam: function(student){
+      let exam = new Exam(student);
+      this.examList.addStudentToStudentsExams(exam);
+    },
     // get an exam list from database
     getExamList: function(){
       // Get id from url
@@ -235,38 +215,12 @@ export default {
         }
       );
     },
-
-    // Remove a student added to exam list
-    removeStudentAdded: function(studentID){
-      for (var i = 0; i < this.students.length; i++) {
-        if(this.students[i].id == studentID){
-          this.students.splice(i, 1)
-        }
+    removeStudentFromStudentsExams: function(studentID, index){
+      if(studentID != null){
+        this.studentsExamsRemovedIds.push(studentID)
       }
-    },
-
-    removeStudentFromStudentsExams: function(index){
       this.examList.students_exams.splice(index, 1);
     },
-
-    checkIfAlreadyAdded: function(studentID){
-      for (var i = 0; i < this.students.length; i++) {
-        if(this.students[i].id == studentID){
-          return true
-        }
-      }
-      return false;
-    },
-
-    addStudent: function(studentID, index){
-      //check if not student is already in exam list
-      if(!this.examList.checkIfStudentInExamList(studentID)[0] &&
-        !this.checkIfAlreadyAdded(studentID)){
-
-        this.students.push(this.studentsFound[index]);
-      }
-    },
-
     deleteExamList: function(){
       window.backend.Service.DeleteExamList(this.id)
       .then(
@@ -279,68 +233,31 @@ export default {
       }
     },
 
-    archiveExamList: function(){
-      // switch betxeen true an false to archive an deachive an
-      // exam list
-      this.examList.archiveAndDearchive();
-
-      // Make the request to backend
-      window.backend.Service.ArchiveExamList(
-        this.id,
-        this.examList.archived
-      ).then(
-        err=>{this.errorArchive = err}
-      );
-
-      let message = new ExamListMessages()
-      // Chenck if there is an error
-      if(this.errorArchive != null){
-        this.alertVariant = "warning";
-        // Check if we wanted to archive or deachive
-        if(this.examList.archived){
-          this.alertMessage = message.EXAM_LIST_ERR_ARCHIVED_MESSAGE;
-        }else{
-          this.alertMessage = message.EXAM_LIST_ERR_DEARCHIVED_MESSAGE;
-        }
-
-      }else{
-        this.alertVariant = "success";
-        if(this.examList.archived){
-          this.alertMessage = message.EXAM_LIST_ARCHIVED_MESSAGE;
-        }else{
-          this.alertMessage = message.EXAM_LIST_DEARCHIVED_MESSAGE;
-        }
-      }
-      this.examListUpdated = true;
-    },
-
     updateExamList: function(){
       // Update Exam list to make it exportable to backend
-      let exportExamList = this.examList.outExamList();
+      let outExamList = this.examList.outExamList();
 
-      // parse student to object
-      let outStudentsList = []
-      if(this.students.length > 0){
-        for (var i = 0; i < this.students.length; i++) {
-          this.students[i] = this.students[i].outStudent();
-          outStudentsList.push(this.students[i]);
-        }
-      }
       // make request to backend
       window.backend.Service.UpdateExamList(
-        exportExamList.id,
-        exportExamList.date_exam,
-        exportExamList.examiner,
-        exportExamList.students_exams,
-        outStudentsList,
+        outExamList,
+        this.studentsExamsRemovedIds,
       ).then(
-        data=>{
-          this.examList = new ExamList(data);
-          this.students = [];
-
+        (data)=>{
+          if("students_exams" in data) {
+            for (var i = 0; i < data.students_exams.length; i++) {
+              let student = this.examList.students_exams[i].student;
+              data.students_exams[i].student = student;
+              // data.students_exams[i].student.parseStudent();
+              this.examList.students_exams[i] = data.students_exams[i];
+            }
+          }
+          this.data = data;
         },
-        err=>{this.errorUpdateExamList = err},
+        err=>{
+          this.errorUpdateExamList = err;
+        },
       );
+
       let message = new ExamListMessages()
       if(this.errorUpdateExamList != null){
         this.alertVariant = "warning";
@@ -350,15 +267,24 @@ export default {
         this.alertMessage = message.EXAM_LIST_UPDATED_MESSAGE;
       }
       this.examListUpdated = true;
-    },
-    checkIfExamListCanBeArchived: function(){
-      let now = moment();
-      let date = moment(this.examList.date_exam, "DD-MM-YYYY");
-      return now.day() <= date.day();
+      this.updated = true;
     },
     exportPDF: function(){
       window.backend.Service.ExportExamListPDF(this.id)
       .then(err=>this.errPDF = err);
+    },
+    checkIfCanBeArchived: function(){
+      if(moment(this.examList.date_exam, "DD-MM-YYYY").format() >
+        moment().format()){
+        return false
+      }
+      return true
+    },
+    getStatus(status){
+      if(status){
+        return "Réussi"
+      }
+      return "Recaler"
     }
   }
 }

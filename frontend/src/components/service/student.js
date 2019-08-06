@@ -20,7 +20,6 @@ export default class Student{
     this.first_name_ar = "";
     this.last_name_ar = "";
     this.maiden_name_ar = "";
-
     this.phone_number = studentObject["phone_number"]
     this.job = studentObject["job"]
     this.birthday = studentObject["birthday"]
@@ -32,10 +31,9 @@ export default class Student{
     this.registred_date = studentObject["registred_date"]
     this.image = studentObject["image"]
     this.next_exam = studentObject["next_exam"]
-
-    if("last_exam_date" in studentObject){
-      this.last_exam_date = studentObject["last_exam_date"]
-    }
+    this.last_exam_list = studentObject["last_exam_list"]
+    this.last_exam_status = studentObject["last_exam_status"]
+    this.win_date = studentObject["win_date"];
 
     this.archived = studentObject["archived"]
 
@@ -116,15 +114,9 @@ export default class Student{
       }
     )
 
-    if("registred_date" in this){
-      let rd = this.registred_date;
-      this.registred_date = moment(rd, DATE_FORMAT).format();
-    }
+    let outRegistred = moment(this.registred_date, DATE_FORMAT).format();
+    let outBirthday = moment(this.birthday, DATE_FORMAT).format();
 
-    if("birthday" in this){
-      let br = this.birthday;
-      this.birthday = moment(br, DATE_FORMAT).format();
-    }
     return {
       "id": this.id,
       "file_number": this.file_number,
@@ -133,13 +125,13 @@ export default class Student{
       "maiden_name": this.maiden_name,
       "phone_number": this.phone_number,
       "job": this.job,
-      "birthday": this.birthday,
+      "birthday": outBirthday,
       "gender": this.gender,
       "country": this.country,
       "city": this.city,
       "department": this.department,
       "address_street": this.address_street,
-      "registred_date": this.registred_date,
+      "registred_date": outRegistred,
       "next_exam": this.next_exam,
       "archived": this.archived,
     }

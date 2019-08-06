@@ -41,7 +41,7 @@ export default class ExamList{
   checkIfStudentInExamList(studentID){
     if(this.students_exams.length > 0){
       for (var i = 0; i < this.students_exams.length; i++) {
-        if(this.students_exams[i].id == studentID){
+        if(this.students_exams[i].student_id == studentID){
           return [true, i];
         }
       }
@@ -50,9 +50,9 @@ export default class ExamList{
   }
 
   // Add student to students_exams list
-  addStudentToStudentsExams(student){
-    if(!this.checkIfStudentInExamList(student)[0]){
-      this.students_exams.push(student);
+  addStudentToStudentsExams(exam){
+    if(!this.checkIfStudentInExamList(exam.student_id)[0]){
+      this.students_exams.push(exam);
     }
   }
 
@@ -65,19 +65,20 @@ export default class ExamList{
   }
 
   outExamList(){
-    let ed = this.date_exam;
-    this.date_exam = moment(ed, DATE_FORMAT).format();
-
+    let date = moment(this.date_exam, DATE_FORMAT).format()
+    let outStudentsExams = [];
     for (var i = 0; i < this.students_exams.length; i++) {
-      this.students_exams[i].student =
-      this.students_exams[i].student.outStudent();
+      let exam = copyInstance(this.students_exams[i])
+      exam.student = this.students_exams[i].student.outStudent();
+      exam.date_exam = date;
+      outStudentsExams.push(exam)
     }
     return {
       "id": this.id,
-      "date_exam": this.date_exam,
+      "date_exam": date,
       "examiner": this.examiner,
       "archived": this.archived,
-      "students_exams": this.students_exams,
+      "students_exams": outStudentsExams,
     }
   }
 
@@ -85,4 +86,13 @@ export default class ExamList{
   archiveAndDearchive(){
     this.archived = !this.archived;
   }
+}
+function copyInstance (original) {
+  var copied = Object.assign(
+    Object.create(
+      Object.getPrototypeOf(original)
+    ),
+    original
+  );
+  return copied;
 }

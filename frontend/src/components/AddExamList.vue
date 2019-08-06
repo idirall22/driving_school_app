@@ -26,7 +26,7 @@
 
       <SearchStudent
         ref="search"
-        :students="students">
+        v-on:studentAdded= "createStudentExam($event)">
       </SearchStudent>
 
 
@@ -45,23 +45,23 @@
 
           </thead>
           <tbody>
-            <tr v-for="(student, index) in students" :key="student.key">
+            <tr v-for="(exam, index) in studentsExams" :key="exam.student_id">
               <td class="align-middle text-center">{{index+1}}</td>
               <td class="align-middle text-center">
-                {{student.file_number}}
+                {{exam.student.file_number}}
               </td>
               <td class="align-middle text-center">
-                {{student.last_name_fr | capitalize}}
-                {{student.first_name_fr | capitalize}}
+                {{exam.student.last_name_fr | capitalize}}
+                {{exam.student.first_name_fr | capitalize}}
               </td>
               <td class="align-middle text-center">
-                {{student.birthday}}
+                {{exam.student.birthday}}
               </td>
               <td class="align-middle text-center">B</td>
               <td class="align-middle text-center">
-                {{student.getExamName(student.next_exam)}}</td>
+                {{exam.student.getExamName(exam.student.next_exam)}}</td>
               <td>
-                <button @click.prevent="removeStudent(index)"
+                <button @click.prevent="removeStudentExam(index)"
                   type="button" class="form-control close"
                   data-dismiss="alert" aria-label="Close">
                  <span aria-hidden="true">&times;</span>
@@ -79,7 +79,7 @@
 import VueBootstrapDatetimepicker from 'vue-bootstrap-datetimepicker';
 import Header from './parts/Header';
 import SearchStudent from './parts/SearchStudent';
-// import Student from './service/student.js';
+import Exam from './service/exam.js';
 import {ExamListMessages} from './service/messages.js'
 
 import moment from 'moment'
@@ -98,7 +98,7 @@ export default {
     examListCreated: false,
 
     examinerName: "",
-    students:[],
+    studentsExams: [],
 
     options:{
       format:"DD-MM-YYYY",
@@ -110,20 +110,32 @@ export default {
       this.errorCreateExamList = null;
       this.examListCreated =  false;
     },
+    createStudentExam: function(student){
+      if(student != null){
+        let exam = new Exam(student, null)
+        this.studentsExams.push(exam)
+      }
+    },
+    removeStudentExam: function(index){
+      this.studentsExams.splice(index, 1)
+    },
     createExamList: function(){
-      let outStudents = [];
+      let outStudentsExams = []
 
-      if(this.students.length > 0){
-        for (var i = 0; i < this.students.length; i++) {
-          outStudents.push(this.students[i].outStudent());
+      let dateExamOut = moment(this.examDate, "DD-MM-YYYY").format();
+      if(this.studentsExams.length > 0){
+        for (var i = 0; i < this.studentsExams.length; i++) {
+          outStudentsExams.push(this.studentsExams[i].
+            outExam(dateExamOut));
         }
       }
-
-      window.backend.Service.CreateExamList(
-        moment(this.examDate, "DD-MM-YYYY").format(),
-        this.examinerName,
-        outStudents,
-      )
+      let examList = {
+        "date_exam": dateExamOut,
+        "examiner": this.examinerName,
+        "students_exams": outStudentsExams,
+        "archived": false,
+      }
+      window.backend.Service.CreateExamList(examList)
       .then(
         ()=>{},
         err=>{this.errorCreateExamList= err}
@@ -139,10 +151,8 @@ export default {
         this.alertMessage = messages.EXAM_LIST_CREATED_MESSAGE;
       }
       this.examListCreated = true;
-    },
-    // Delete student from exam list
-    removeStudent: function(index){
-      this.students.splice(index, 1)
+      this.examDate = null;
+      this.studentsExams = [];
     },
   },
 }

@@ -394,7 +394,7 @@ export default {
       }
         window.backend.Service.CreateStudent(this.student).
         then(
-          data=>{this.data = data;},
+          ()=>{},
           err=>{this.errorCreateStudent = err;},
         )
         let message = new StudentMessages();

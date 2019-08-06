@@ -1,6 +1,5 @@
 <template>
   <div id="studentDetails">
-
     <div v-if="ready">
       <b-alert
         v-model="studentUpdated"
@@ -15,8 +14,8 @@
       <b-progress :max="3" class="mb-3" height= "2rem">
         <b-progress-bar
           variant="success"
-          :value="student.next_exam"
-        > <strong>{{student.getExamName(student.next_exam)}}</strong>
+          :value="getNextExam()"
+        > <strong>{{student.getExamName(getNextExam())}}</strong>
         </b-progress-bar>
       </b-progress>
 
@@ -392,7 +391,7 @@ export default {
     },
     getStudent: function(){
       this.id = this.$route.params.id;
-      window.backend.Service.GetStudent(this.id, "").then(
+      window.backend.Service.GetStudent(this.id, "", "").then(
         data=>{
           this.student = new Student(data["student"], data["exams"]);
           this.ready = true;
@@ -406,14 +405,11 @@ export default {
       );
     },
     updateStudent: function(){
-      this.student.outStudent();
-
+      let outStudent = this.student.outStudent();
       window.backend.Service.UpdateStudent(
-        this.student)
+        outStudent)
         .then(
-          data=>{
-            this.data = data;
-        },
+          ()=>{},
         err =>{
           this.errorUpdate = err;
         }
@@ -424,6 +420,16 @@ export default {
       }
       this.studentUpdated = true;
     },
+    getNextExam: function(){
+      if(this.student.exams.length > 0){
+        let id = this.student.exams.length-1;
+        if(this.student.exams[id].status){
+          return this.student.exams[id].exam +1
+        }
+        return this.student.exams[id].exam
+      }
+      return 1
+    }
   }
 }
 </script>
