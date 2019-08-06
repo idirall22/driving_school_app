@@ -55,6 +55,7 @@ type Student struct {
 	AddressStreet string     `gorm:"type:varchar(512)" json:"address_street,omitempty"`
 	RegistredDate time.Time  `json:"registred_date,omitempty"`
 	Image         string     `gorm:"default:'imageURL'" json:"image,omitempty"`
+	WinDate       *time.Time `sql:"index" json:"win_date,omitempty"`
 	Archived      bool       `json:"archived"`
 }
 
