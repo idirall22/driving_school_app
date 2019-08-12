@@ -1,5 +1,5 @@
 import moment from 'moment';
-
+// import Exam from './exam.js'
 const DATE_FORMAT = "DD-MM-YYYY";
 
 export default class Student{
@@ -30,10 +30,10 @@ export default class Student{
     this.address_street = studentObject["address_street"]
     this.registred_date = studentObject["registred_date"]
     this.image = studentObject["image"]
-    this.next_exam = studentObject["next_exam"]
-    this.last_exam_list = studentObject["last_exam_list"]
+    this.exam_level = studentObject["exam_level"]
+    this.last_exam_date = studentObject["last_exam_date"]
     this.last_exam_status = studentObject["last_exam_status"]
-    this.win_date = studentObject["win_date"];
+    this.win_licence_date = studentObject["win_licence_date"];
 
     this.archived = studentObject["archived"]
 
@@ -136,7 +136,25 @@ export default class Student{
       "archived": this.archived,
     }
   }
+  getExamLevel(){
+    if(this.exams != null){
+      let len = this.exams.length
+      let level = 1;
+      if(len > 0){
+        for (var i = 0; i < len; i++) {
+          if(this.exams[i].status){
+            level ++;
+          }
+        }
+      }
+      return level
+    }
+    return 1
+  }
   getExamName(index){
+    if(index == 0){
+      index = this.getExamLevel()
+    }
     switch (index) {
       case 1:
         return "Code";

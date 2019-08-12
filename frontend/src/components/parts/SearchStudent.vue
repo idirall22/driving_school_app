@@ -45,7 +45,7 @@ export default {
   name: "searchStudent",
   data: () => ({
     studentsFound: [],
-    studentLastName: "mak",
+    studentLastName: "",
     found: false,
   }),
   methods: {
@@ -53,9 +53,13 @@ export default {
       this.studentsFound = [];
       this.found = false;
       this.studentLastName="";
+      if(student.exam_level > 3){
+        return
+      }
       this.$emit("studentAdded", student);
     },
     searchStudent:function(){
+      this.studentsFound = [];
       //Check if student name length is greather then 2
       if(this.studentLastName.length > 2){
         window.backend.Service.GetStudents(

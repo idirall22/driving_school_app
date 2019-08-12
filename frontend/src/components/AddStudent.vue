@@ -358,6 +358,7 @@ export default {
   }),
   methods:{
     addStudent:function(){
+      this.closeAlert();
       if(this.maidenName == ""){
         this.maidenName = "None";
         this.arMaidenName = "None";
@@ -394,19 +395,19 @@ export default {
       }
         window.backend.Service.CreateStudent(this.student).
         then(
-          ()=>{},
-          err=>{this.errorCreateStudent = err;},
+          (id)=>{
+            this.$router.push({name: "studentDetails", params:{"id": id}})
+          },
+          err=>{
+            this.errorCreateStudent = err;
+            let message = new StudentMessages()
+            this.alertVariant = "warning";
+            this.alertMessage = message.STUDENT_ERR_CREATED_MESSAGE;
+            this.studentCreated = true;
+          },
         )
-        let message = new StudentMessages();
-        if(this.errorCreateStudent != null){
-          this.alertVariant = "warning";
-          this.alertMessage = message.STUDENT_ERR_CREATED_MESSAGE;
-        }else{
-          this.alertVariant = "success";
-          this.alertMessage = message.STUDENT_CREATED_MESSAGE;
-        }
-        this.studentCreated = true;
     },
+    
     closeAlert:function(){
       this.studentCreated = false;
       this.errorCreateStudent = null;

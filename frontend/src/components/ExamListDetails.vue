@@ -18,18 +18,18 @@
           @click="deleteExamList"
           type="button">Suprimer la liste
         </button>
-        <b-button v-if="!examList.archived" :disabled="checkIfCanBeArchived()"
-          class="ml-2 btn btn-success"
+      </div>
+      <div class="">
+        <b-button v-if="!examList.archived" :disabled="!checkIfCanBeArchived()"
+          class="mr-2 btn btn-success"
           @click="examList.archived=!examList.archived"
           type="button">Archivé
         </b-button>
-        <b-button v-if="examList.archived" :disabled="checkIfCanBeArchived()"
-          class="btn btn-success"
+        <b-button v-if="examList.archived" :disabled="!checkIfCanBeArchived()"
+          class="mr-2 btn btn-success"
           @click="examList.archived=!examList.archived"
           type="button">Déarchivé
         </b-button>
-      </div>
-      <div class="">
         <button
           class="btn btn-danger"
           @click="exportPDF"
@@ -68,7 +68,7 @@
        </b-form-group>
      <!-- end exam Date -->
 
-     <SearchStudent v-if="!examList.archived" class="mb-3"
+     <SearchStudent v-if="!examList.archived && !checkIfCanBeArchived()" class="mb-3"
        ref="search"
        v-on:studentAdded= "createStudentExam($event)"
        >
@@ -87,7 +87,7 @@
              <th class="align-middle text-center">Examen</th>
              <th class="align-middle text-center">Résultat</th>
              <th
-               v-if="!examList.archived"
+               v-if="!examList.archived && !checkIfCanBeArchived()"
                class="align-middle text-center">Retirer
              </th>
            </tr>
@@ -110,7 +110,7 @@
              </td>
              <td class="align-middle text-center">B</td>
              <td class="align-middle text-center">
-               {{exam.student.getExamName(exam.exam)}}
+               {{exam.student.getExamName(exam.exam_level)}}
              </td>
              <td v-if="examList.archived"
                   class="align-middle text-center"
@@ -124,7 +124,7 @@
                 ></b-form-checkbox>
               </td>
               <td v-if="examList.archived"></td>
-             <td v-if="!examList.archived" class="align-middle text-center">
+             <td v-if="!examList.archived && !checkIfCanBeArchived()" class="align-middle text-center">
                <button @click.prevent="removeStudentFromStudentsExams(exam.id, index)"
                  type="button" class="form-control close"
                  data-dismiss="alert" aria-label="Close">
@@ -187,7 +187,6 @@ export default {
     },
   }),
   methods:{
-
     closeAlert:function(){
       this.examListUpdated = false;
       this.errorUpdateExamList = null;
@@ -195,7 +194,7 @@ export default {
       this.errorDelete = null;
     },
     createStudentExam: function(student){
-      let exam = new Exam(student);
+      let exam = new Exam(null, student, null);
       this.examList.addStudentToStudentsExams(exam);
     },
     // get an exam list from database
@@ -238,10 +237,7 @@ export default {
       let outExamList = this.examList.outExamList();
 
       // make request to backend
-      window.backend.Service.UpdateExamList(
-        outExamList,
-        this.studentsExamsRemovedIds,
-      ).then(
+      window.backend.Service.UpdateExamList(outExamList).then(
         (data)=>{
           if("students_exams" in data) {
             for (var i = 0; i < data.students_exams.length; i++) {
@@ -252,20 +248,17 @@ export default {
             }
           }
           this.data = data;
+          let message = new ExamListMessages()
+          this.alertVariant = "success";
+          this.alertMessage = message.EXAM_LIST_UPDATED_MESSAGE;
         },
         err=>{
           this.errorUpdateExamList = err;
+          let message = new ExamListMessages()
+          this.alertVariant = "warning";
+          this.alertMessage = message.EXAM_LIST_ERR_UPDATED_MESSAGE;
         },
       );
-
-      let message = new ExamListMessages()
-      if(this.errorUpdateExamList != null){
-        this.alertVariant = "warning";
-        this.alertMessage = message.EXAM_LIST_ERR_UPDATED_MESSAGE;
-      }else{
-        this.alertVariant = "success";
-        this.alertMessage = message.EXAM_LIST_UPDATED_MESSAGE;
-      }
       this.examListUpdated = true;
       this.updated = true;
     },

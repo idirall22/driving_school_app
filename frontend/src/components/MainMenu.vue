@@ -8,7 +8,11 @@
           </div>
           <!-- TODO make better solution -->
           <!-- Students list -->
-
+          <li class="nav-item">
+            <router-link :to="{ name: 'dashboard' }" class="nav-link">
+              Burreau
+            </router-link>
+          </li>
           <li class="nav-item">
             <router-link :to="{ name: 'listStudents' }" class="nav-link">
               Tous Étudiants

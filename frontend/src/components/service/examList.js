@@ -1,5 +1,6 @@
 import moment from 'moment';
 import Student from './student.js'
+import Exam from './exam.js'
 
 
 const DATE_FORMAT = "DD-MM-YYYY";
@@ -7,20 +8,32 @@ const DATE_FORMAT = "DD-MM-YYYY";
 
 export default class ExamList{
   constructor(examListObject) {
-    this.id = examListObject["id"]
-    this.created_at = examListObject["created_at"]
-    this.updated_at = examListObject["updated_at"]
-    this.date_exam = examListObject["date_exam"]
-    this.examiner = examListObject["examiner"]
-    this.archived = examListObject["archived"]
-
-    if(!("students_exams" in examListObject)){
+    if(examListObject == null){
+      this.id = null;
+      this.created_at = null;
+      this.updated_at = null;
+      this.date_exam = null;
+      this.examiner = "No Name";
+      this.archived = false;
       this.students_exams = [];
     }else{
-      this.students_exams = examListObject["students_exams"]
+      this.id = examListObject["id"]
+      this.created_at = examListObject["created_at"]
+      this.updated_at = examListObject["updated_at"]
+      this.date_exam = examListObject["date_exam"]
+      this.examiner = examListObject["examiner"]
+      this.archived = examListObject["archived"]
+
+      this.students_exams = [];
+      if("students_exams" in examListObject && examListObject["students_exams"].length > 0){
+        for (var i = 0; i < examListObject["students_exams"].length; i++) {
+          let exam = new Exam(examListObject["students_exams"][i], null, null)
+          this.students_exams.push(exam);
+        }
+      }
+      this.convertToStudentObject();
+      this.momentExamDate();
     }
-    this.convertToStudentObject();
-    this.momentExamDate();
   }
 
 
@@ -67,10 +80,13 @@ export default class ExamList{
   outExamList(){
     let date = moment(this.date_exam, DATE_FORMAT).format()
     let outStudentsExams = [];
+    // Prepare exams to be exported
     for (var i = 0; i < this.students_exams.length; i++) {
-      let exam = copyInstance(this.students_exams[i])
-      exam.student = this.students_exams[i].student.outStudent();
-      exam.date_exam = date;
+      // let exam = copyInstance(this.students_exams[i])
+      // console.log(this.students_exams[i].constructor.name)
+      let exam = this.students_exams[i].outExam(date)
+      // exam.student = this.students_exams[i].student.outStudent();
+      // exam.date_exam = date;
       outStudentsExams.push(exam)
     }
     return {
@@ -87,12 +103,12 @@ export default class ExamList{
     this.archived = !this.archived;
   }
 }
-function copyInstance (original) {
-  var copied = Object.assign(
-    Object.create(
-      Object.getPrototypeOf(original)
-    ),
-    original
-  );
-  return copied;
-}
+// function copyInstance (original) {
+//   var copied = Object.assign(
+//     Object.create(
+//       Object.getPrototypeOf(original)
+//     ),
+//     original
+//   );
+//   return copied;
+// }

@@ -15,13 +15,13 @@
 
       <!-- Exam date -->
       <b-form-group id="examDate"
-        label="Date d'examen:" label-for="examDate">
+        label="Date d'examen:" label-for="datepicker">
         <vue-bootstrap-datetimepicker
-          v-model="examDate"
-          id="datepicker"
+          v-model="examList.date_exam"
           :config="options">
         </vue-bootstrap-datetimepicker>
       </b-form-group>
+
       <!-- end exam Date -->
 
       <SearchStudent
@@ -45,7 +45,7 @@
 
           </thead>
           <tbody>
-            <tr v-for="(exam, index) in studentsExams" :key="exam.student_id">
+            <tr v-for="(exam, index) in examList.students_exams" :key="exam.student_id">
               <td class="align-middle text-center">{{index+1}}</td>
               <td class="align-middle text-center">
                 {{exam.student.file_number}}
@@ -59,10 +59,10 @@
               </td>
               <td class="align-middle text-center">B</td>
               <td class="align-middle text-center">
-                {{exam.student.getExamName(exam.student.next_exam)}}</td>
+                {{exam.student.getExamName(exam.exam_level)}}</td>
               <td>
                 <button @click.prevent="removeStudentExam(index)"
-                  type="button" class="form-control close"
+                  type="button" class="form-control close align-middle text-center"
                   data-dismiss="alert" aria-label="Close">
                  <span aria-hidden="true">&times;</span>
                </button>
@@ -80,9 +80,10 @@ import VueBootstrapDatetimepicker from 'vue-bootstrap-datetimepicker';
 import Header from './parts/Header';
 import SearchStudent from './parts/SearchStudent';
 import Exam from './service/exam.js';
+import ExamList from './service/examList.js';
 import {ExamListMessages} from './service/messages.js'
 
-import moment from 'moment'
+// import moment from 'moment'
 export default {
   name: "addExamList",
   components: {
@@ -90,15 +91,16 @@ export default {
     SearchStudent,
     Header
   },
+  created:function(){
+    this.examList = new ExamList(null);
+  },
   data: () => ({
     alertVariant:"",
     alertMessage:"",
     errorCreateExamList: null,
-    examDate: null,
     examListCreated: false,
 
-    examinerName: "",
-    studentsExams: [],
+    examList: null,
 
     options:{
       format:"DD-MM-YYYY",
@@ -112,47 +114,45 @@ export default {
     },
     createStudentExam: function(student){
       if(student != null){
-        let exam = new Exam(student, null)
-        this.studentsExams.push(exam)
+        let exam = new Exam(null, student, null);
+        this.examList.addStudentToStudentsExams(exam);
       }
     },
     removeStudentExam: function(index){
-      this.studentsExams.splice(index, 1)
+      this.examList.students_exams.splice(index, 1)
+    },
+    displayMessage: function(msg, variant){
+      this.alertVariant = variant;
+      this.alertMessage = msg;
+      this.examListCreated = true;
+    },
+    validateForm: function(){
+      if(this.examList.date_exam == null){
+        this.displayMessage("La date d'examen n'a pas été choisie", "warning")
+        return true
+      }
+      if(this.examList.students_exams.length == 0){
+        this.displayMessage("La liste d'étudiant est vide", "warning")
+        return true
+      }
+      return false
     },
     createExamList: function(){
-      let outStudentsExams = []
-
-      let dateExamOut = moment(this.examDate, "DD-MM-YYYY").format();
-      if(this.studentsExams.length > 0){
-        for (var i = 0; i < this.studentsExams.length; i++) {
-          outStudentsExams.push(this.studentsExams[i].
-            outExam(dateExamOut));
-        }
+      this.closeAlert();
+      if(this.validateForm()){
+        return
       }
-      let examList = {
-        "date_exam": dateExamOut,
-        "examiner": this.examinerName,
-        "students_exams": outStudentsExams,
-        "archived": false,
-      }
-      window.backend.Service.CreateExamList(examList)
+      window.backend.Service.CreateExamList(this.examList.outExamList())
       .then(
-        ()=>{},
-        err=>{this.errorCreateExamList= err}
+        (id)=>{
+          this.$router.push({name: "examListDetails", params:{"id": id}})
+        },
+        err=>{
+          this.errorCreateExamList= err
+          let messages = new ExamListMessages();
+          this.displayMessage(messages.EXAM_LIST_ERR_CREATED_MESSAGE, "warning")
+        }
       )
-      let messages = new ExamListMessages();
-      if(this.errorCreateExamList != null){
-        this.alertVariant = "warning";
-        // this.alertMessage ="La liste d'éxamen n'a pas été crée";
-        this.alertMessage = messages.EXAM_LIST_ERR_CREATED_MESSAGE;
-      }else{
-        this.alertVariant = "success";
-        // this.alertMessage = "La liste d'éxamen a été crée";
-        this.alertMessage = messages.EXAM_LIST_CREATED_MESSAGE;
-      }
-      this.examListCreated = true;
-      this.examDate = null;
-      this.studentsExams = [];
     },
   },
 }

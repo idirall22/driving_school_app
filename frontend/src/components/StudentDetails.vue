@@ -11,11 +11,11 @@
       <Header initTitle="Détails"></Header>
       <p>Prochain Examen:</p>
 
-      <b-progress :max="3" class="mb-3" height= "2rem">
+      <b-progress :max="4" class="mb-3" height= "2rem">
         <b-progress-bar
           variant="success"
-          :value="getNextExam()"
-        > <strong>{{student.getExamName(getNextExam())}}</strong>
+          :value="student.exam_level"
+        > <strong>{{student.getExamName(student.exam_level)}}</strong>
         </b-progress-bar>
       </b-progress>
 
@@ -336,7 +336,7 @@
             <tr v-for="(exam, index) in student.exams" :key="exam.id">
               <td class="align-middle text-center">{{index+1}}</td>
               <td class="align-middle text-center">{{exam.date_exam | moment2}}</td>
-              <td class="align-middle text-center">{{student.getExamName(exam.exam)}}</td>
+              <td class="align-middle text-center">{{exam.exam_level}}</td>
               <td v-if="exam.status" class="align-middle text-center">Gagné</td>
               <td v-else class="align-middle text-center">Perdu</td>
             </tr>
@@ -429,7 +429,8 @@ export default {
         return this.student.exams[id].exam
       }
       return 1
-    }
+    },
+
   }
 }
 </script>
