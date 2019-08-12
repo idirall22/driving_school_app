@@ -5,16 +5,22 @@ import (
 	"time"
 )
 
-func testGetWinLicencePerYear(t *testing.T) {
+// Test Analytics
+func testAnalytics(t *testing.T) {
 	year := 2011
-	dates, err := MainService.GetWinLicencePerYear(year)
+	dates, err := MainService.Analytics(
+		"students",
+		"win_licence_date",
+		year,
+	)
+
 	if err != nil {
 		t.Fatal(err)
 	}
 	students := openJSONStudentFile("")
 	count := 0
 	for _, std := range students {
-		if val, ok := std["win_date"]; ok {
+		if val, ok := std["win_licence_date"]; ok {
 			date, _ := time.Parse(time.RFC3339, val.(string))
 			if year == date.Year() {
 				count++
@@ -22,14 +28,7 @@ func testGetWinLicencePerYear(t *testing.T) {
 		}
 	}
 	if count != len(dates) {
-		t.Error("There is an error this should be equal")
-	}
-}
-
-func testGetExamsResults(t *testing.T) {
-	_, err := MainService.GetExamsResults(2019)
-
-	if err != nil {
-		t.Fatal(err)
+		t.Errorf("There is an error this should be equal but found %d != %d",
+			count, len(dates))
 	}
 }
