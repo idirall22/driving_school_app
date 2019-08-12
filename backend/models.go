@@ -37,26 +37,29 @@ type MultiLanguageField struct {
 
 //Student model
 type Student struct {
-	ID            uint       `gorm:"primary_key" json:"id,omitempty"`
-	CreatedAt     time.Time  `sql:"DEFAULT:current_timestamp" json:"created_at,omitempty"`
-	UpdatedAt     time.Time  `json:"updated_at,omitempty"`
-	DeletedAt     *time.Time `sql:"index"`
-	FileNumber    string     `gorm:"unique" json:"file_number,omitempty"`
-	FirstName     string     `gorm:"type:varchar(512)" json:"first_name,omitempty"`
-	LastName      string     `gorm:"type:varchar(512);index:last_name" json:"last_name,omitempty"`
-	MaidenName    string     `gorm:"type:varchar(512)" json:"maiden_name,omitempty"`
-	PhoneNumber   string     `json:"phone_number,omitempty"`
-	Job           string     `json:"job,omitempty"`
-	BirthDay      time.Time  `json:"birthday,omitempty"`
-	Gender        string     `json:"gender,omitempty"`
-	Country       string     `json:"country,omitempty"`
-	City          string     `json:"city,omitempty"`
-	Department    string     `json:"department,omitempty"`
-	AddressStreet string     `gorm:"type:varchar(512)" json:"address_street,omitempty"`
-	RegistredDate time.Time  `json:"registred_date,omitempty"`
-	Image         string     `gorm:"default:'imageURL'" json:"image,omitempty"`
-	WinDate       *time.Time `sql:"index" json:"win_date,omitempty"`
-	Archived      bool       `json:"archived"`
+	ID             uint       `gorm:"primary_key" json:"id,omitempty"`
+	CreatedAt      time.Time  `sql:"DEFAULT:current_timestamp" json:"created_at,omitempty"`
+	UpdatedAt      time.Time  `json:"updated_at,omitempty"`
+	DeletedAt      *time.Time `sql:"index"`
+	FileNumber     string     `gorm:"unique" json:"file_number,omitempty"`
+	FirstName      string     `gorm:"type:varchar(512)" json:"first_name,omitempty"`
+	LastName       string     `gorm:"type:varchar(512);index:last_name" json:"last_name,omitempty"`
+	MaidenName     string     `gorm:"type:varchar(512)" json:"maiden_name,omitempty"`
+	PhoneNumber    string     `json:"phone_number,omitempty"`
+	Job            string     `json:"job,omitempty"`
+	BirthDay       time.Time  `json:"birthday,omitempty"`
+	Gender         string     `json:"gender,omitempty"`
+	Country        string     `json:"country,omitempty"`
+	City           string     `json:"city,omitempty"`
+	Department     string     `json:"department,omitempty"`
+	AddressStreet  string     `gorm:"type:varchar(512)" json:"address_street,omitempty"`
+	RegistredDate  time.Time  `json:"registred_date,omitempty"`
+	Image          string     `gorm:"default:'imageURL'" json:"image,omitempty"`
+	WinLicenceDate *time.Time `sql:"index" json:"win_licence_date,omitempty"`
+	ExamLevel      uint       `sql:"default:1" json:"exam_level"`
+	LastExamDate   *time.Time `json:"last_exam_date"`
+	LastExamStatus *bool      `json:"last_exam_status"`
+	Archived       bool       `json:"archived"`
 }
 
 // TableName :Database table name
@@ -70,11 +73,11 @@ type Exam struct {
 	CreatedAt  time.Time  `sql:"DEFAULT:current_timestamp" json:"created_at,omitempty"`
 	UpdatedAt  time.Time  `json:"updated_at,omitempty"`
 	DeletedAt  *time.Time `sql:"index"`
-	Exam       uint8      `json:"exam,omitempty"`
+	ExamLevel  uint8      `sql:"default:1" json:"exam_level"`
 	DateExam   time.Time  `json:"date_exam,omitempty"`
 	Status     bool       `gorm:"default:false" json:"status"`
 	StudentID  uint       `json:"student_id,omitempty"`
-	Student    Student    `json:"student,omitempty"`
+	Student    *Student   `json:"student,omitempty"`
 	ExamListID uint       `json:"exam_list_id,omitempty"`
 }
 
