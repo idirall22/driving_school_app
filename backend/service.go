@@ -36,15 +36,16 @@ func InitService(db *gorm.DB) {
 	}
 	MainService.db.AutoMigrate(&Student{}, &Exam{}, &ExamList{})
 
-	students := openJSONStudentFile("backend/students_test.json")
+	if testMode == true {
+		students := openJSONStudentFile("backend/students_test.json")
 
-	for i := 0; i < len(students); i++ {
-		_, err := MainService.CreateStudent(students[i])
-		if err != nil {
-			log.Fatal(err)
+		for i := 0; i < len(students); i++ {
+			_, err := MainService.CreateStudent(students[i])
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
-
 }
 
 //CloseService close database connection

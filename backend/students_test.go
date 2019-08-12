@@ -2,6 +2,8 @@ package service
 
 import (
 	"log"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -11,8 +13,9 @@ import (
 
 func connectDatabse() {
 	students = openJSONStudentFile("")
-
-	db, err := gorm.Open("sqlite3", "db/db.sqlite3")
+	r, _ := os.UserHomeDir()
+	path := filepath.Join(r, "db/db.sqlite3")
+	db, err := gorm.Open("sqlite3", path)
 	if err != nil {
 		log.Println("Error to connect database")
 		log.Fatal(err)

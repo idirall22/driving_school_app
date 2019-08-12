@@ -2,20 +2,27 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 )
 
+// GetRootDir return string root os path
+func GetRootDir() string {
+	r, _ := os.UserHomeDir()
+	return r
+}
+
 // Create a database directory if not exist.
 func createDatabaseDir(databaseDir string, permission os.FileMode) error {
-
-	_, err := os.Stat(databaseDir)
-
+	p := filepath.Join(GetRootDir(), databaseDir)
+	_, err := os.Stat(p)
+	fmt.Println(os.IsNotExist(err))
 	if err != nil {
 		if os.IsNotExist(err) {
-			if err := os.Mkdir(databaseDir, permission); err != nil {
+			if err := os.MkdirAll(p, permission); err != nil {
 				return err
 			}
 		} else {
@@ -29,13 +36,8 @@ func createDatabaseDir(databaseDir string, permission os.FileMode) error {
 func createDatabaseFile(databaseDir, databaseName string,
 	permission os.FileMode) error {
 
-	path := filepath.Join(databaseDir, databaseName)
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, permission)
-
-	defer file.Close()
-	if err != nil {
-		return err
-	}
+	path := filepath.Join(GetRootDir(), databaseDir, databaseName)
+	os.Create(path)
 	return nil
 }
 

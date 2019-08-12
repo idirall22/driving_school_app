@@ -9,8 +9,8 @@ func TestMain(t *testing.T) {
 	t.Run("createStudent", testCreateStudent)
 	t.Run("createExamList", testCreateExamList)
 
-	t.Run("getExamList", testGetExamList)
 	t.Run("getStudent", testGetStudent)
+	t.Run("getExamList", testGetExamList)
 
 	t.Run("getExamLists", testGetExamLists)
 	t.Run("getStudents", testGetStudents)
@@ -18,9 +18,9 @@ func TestMain(t *testing.T) {
 	t.Run("updateExamList", testUpdateExamList)
 	t.Run("updateStudents", testUpdateStudent)
 
-	t.Run("analyticsGetWinLicence", testGetWinLicencePerYear)
-	t.Run("analyticsGetWinExams", testGetExamsResults)
+	t.Run("analytics", testAnalytics)
 
+	// t.Run("exportPDF", testExportExamListPDF)
 	t.Run("deleteExamList", testDeleteExamList)
 	t.Run("deleteStudents", testDeleteStudent)
 
