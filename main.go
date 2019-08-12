@@ -1,7 +1,8 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/jinzhu/gorm"
@@ -13,34 +14,26 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var databaseDirectory = "db"
+var folderName = "auto-ecole/"
+var databaseDirectory = folderName + "db"
 var databaseFileName = "db.sqlite3"
 
-// Test model
-type Test struct {
-}
-
-// Data model
-type Data struct {
-	ID    int
-	Title string `json:"title"`
-}
-
-// Hello method
-func (t *Test) Hello(s string) *Data {
-	return &Data{Title: s + "idir"}
-}
-
 func main() {
-	test := &Test{}
+	path := filepath.Join(
+		service.GetRootDir(),
+		databaseDirectory,
+	)
+
 	if err := service.CreateDatabaseDirFile(databaseDirectory,
 		databaseFileName); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
-	path := filepath.Join(databaseDirectory, databaseFileName)
-	db, err := gorm.Open("sqlite3", path)
+
+	db, err := gorm.Open("sqlite3", filepath.Join(path, databaseFileName))
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	service.InitService(db)
 	defer service.CloseService()
@@ -50,16 +43,14 @@ func main() {
 	css := mewn.String("./frontend/dist/app.css")
 
 	app := wails.CreateApp(&wails.AppConfig{
-		Width:  1024,
-		Height: 768,
-		Title:  "driving_school",
+		Width:  1280,
+		Height: 720,
+		Title:  "Auto école Noureddine",
 		JS:     js,
 		CSS:    css,
 		Colour: "#131313",
 	})
 
 	app.Bind(service)
-	app.Bind(test)
-
 	app.Run()
 }
