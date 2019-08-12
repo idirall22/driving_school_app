@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"time"
 )
 
 // Check if exam list is valid
@@ -11,13 +10,6 @@ func checkIfExamListIsValid(examList *ExamList) bool {
 	// Check if examiner is not empty
 	if examList.Examiner == "" {
 		examList.Examiner = "No Name"
-	}
-
-	if examList.Archived {
-		if examList.DateExam.Day() >= time.Now().Day() {
-			return true
-		}
-		return false
 	}
 	return true
 }

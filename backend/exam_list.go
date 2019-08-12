@@ -2,8 +2,13 @@ package service
 
 import (
 	"encoding/json"
+	"errors"
+	"os"
+	"path"
 	"strconv"
+	"strings"
 
+	"github.com/jinzhu/gorm"
 	"github.com/jung-kurt/gofpdf"
 )
 
@@ -12,12 +17,30 @@ func (s *Service) CreateExamList(examListMap map[string]interface{}) (uint, erro
 
 	// Get examList model from json
 	examList, err := getExamListModelFromMap(examListMap)
+
 	if err != nil {
 		return 0, err
 	}
 
 	// Begin tx
 	tx := MainService.db.Begin()
+
+	// Check if last examList is archived before create a new one
+	var examListLast = &ExamList{}
+	if err := tx.Last(&examListLast).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return 0, err
+		}
+	}
+	if examListLast.ID != 0 {
+		if examListLast.Archived != true {
+			return 0, errors.New("The last exam list need to be archived before create a new one")
+		}
+	}
+
+	for _, exam := range examList.StudentsExams {
+		exam.Student = nil
+	}
 
 	if err := tx.Create(&examList).
 		Error; err != nil {
@@ -43,6 +66,9 @@ func (s *Service) GetExamList(id uint) (*ExamList, error) {
 	}
 
 	for i := 0; i < len(examList.StudentsExams); i++ {
+		if examList.StudentsExams[i].Student == nil {
+			examList.StudentsExams[i].Student = &Student{}
+		}
 		if err := tx.Find(&examList.StudentsExams[i].Student, "id=?",
 			examList.StudentsExams[i].StudentID).Error; err != nil {
 			tx.Rollback()
@@ -73,41 +99,65 @@ func (s *Service) GetExamLists(limit, offset uint) (*ExamListsOut, error) {
 }
 
 // UpdateExamList update an exam list
-func (s *Service) UpdateExamList(examListMap map[string]interface{},
-	examListToDelete []interface{}) (*ExamList, error) {
+func (s *Service) UpdateExamList(examListMap map[string]interface{}) (*ExamList, error) {
 
 	examList, err := getExamListModelFromMap(examListMap)
 	if err != nil {
 		return nil, err
 	}
+
 	tx := MainService.db.Begin()
 
-	// Create exam model to by id provaided to delete them
-	if examListToDelete != nil {
-		oldExams := []*Exam{}
-		if len(examListToDelete) > 0 {
-			for i := 0; i < len(examListToDelete); i++ {
-				exam := Exam{ID: uint(examListToDelete[i].(uint))}
-				oldExams = append(oldExams, &exam)
+	ids := []uint{}
+	for _, exam := range examList.StudentsExams {
+		exam.Student = nil
+		ids = append(ids, exam.ID)
+	}
+
+	if examList.Archived {
+		for _, exam := range examList.StudentsExams {
+			student := &Student{}
+
+			tx.Find(&student, "id=?", exam.StudentID)
+			// setStudentExamInfos(student, exam)
+			if student.LastExamDate != nil {
+				if student.LastExamDate.Unix() == exam.DateExam.Unix() {
+					if *student.LastExamStatus {
+						student.ExamLevel--
+						if student.ExamLevel == 3 {
+							student.WinLicenceDate = nil
+						}
+					}
+				}
 			}
-			if err := tx.Find(&oldExams, "exam_list_id=?", examList.ID).
-				Unscoped().
-				Delete(&examList.StudentsExams).
-				Error; err != nil {
-				tx.Rollback()
-				return nil, err
+			student.LastExamDate = &exam.DateExam
+			student.LastExamStatus = &exam.Status
+			if exam.Status {
+				student.ExamLevel++
+				if student.ExamLevel >= 4 {
+					student.WinLicenceDate = &exam.DateExam
+				}
 			}
+			tx.Save(&student)
 		}
 	}
 
-	// Update examList and associated exams
-	if errS := tx.
-		Save(&examList).
-		Association("StudentsExams").
-		Replace(examList.StudentsExams).
+	// if examList.DateExam.Unix() >= time.Now().Unix() {
+	if err := tx.Unscoped().
+		Where("exam_list_id = ? AND id NOT IN (?)", examList.ID, ids).
+		Delete(&Exam{}).
 		Error; err != nil {
 		tx.Rollback()
-		return nil, errS
+		return nil, err
+	}
+	// }
+
+	if err := tx.Save(&examList).
+		// Association("StudentsExams").
+		// Replace(examList.StudentsExams).
+		Error; err != nil {
+		tx.Rollback()
+		return nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {
@@ -159,7 +209,7 @@ func (s *Service) ExportExamListPDF(id uint) error {
 	pdf.Ln(-1)
 
 	pdf.CellFormat(80, 10, "Centre d'examen Oran: USTO", "", 0, "L", false, 0, "")
-	pdf.CellFormat(100, 10, "Date d'examen 13.06.2019", "", 0, "R", false, 0, "")
+	pdf.CellFormat(100, 10, "Date d'examen "+examList.DateExam.Format("02-01-2006"), "", 0, "R", false, 0, "")
 	pdf.Ln(-1)
 	pdf.CellFormat(80, 10, tr("Nome et prénom de l'examinateur: ............................."),
 		"", 0, "L", false, 0, "")
@@ -183,16 +233,11 @@ func (s *Service) ExportExamListPDF(id uint) error {
 	pdf.CellFormat(30, 8, "", "LRB", 0, "C", false, 0, "")
 	pdf.Ln(-1)
 	pdf.SetFont("Arial", "", 13)
-	// cellsWidth := []float64{20, 20, 30, 50, 15, 30, 30}
-	// align := []string{"C", "C", "L", "C", "C", "C", "C"}
-	// students := [][]string{
-	// 	{"01", "11236", "20-09-1992", "Nom et Prénom", "B", "code", "AJ"},
-	// 	{"02", "11659", "20-09-1992", "Nom et Prénom", "B", "code", "AJ"},
-	// 	{"03", "12365", "20-09-1992", "Nom et Prénom", "B", "code", "AJ"},
-	// 	{"04", "23158", "20-09-1992", "Nom et Prénom", "B", "code", "AJ"},
-	// 	{"05", "84785", "20-09-1992", "Nom et Prénom", "B", "code", "AJ"},
-	// 	{"06", "87865", "20-09-1992", "Nom et Prénom", "B", "code", "AJ"},
-	// }
+
+	lvl1 := 0
+	lvl2 := 0
+	lvl3 := 0
+
 	for i, exam := range examList.StudentsExams {
 		pdf.CellFormat(20, 10, strconv.Itoa(i), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(20, 10, tr(exam.Student.FileNumber), "1", 0, "C", false, 0, "")
@@ -211,15 +256,27 @@ func (s *Service) ExportExamListPDF(id uint) error {
 			&mfn); err != nil {
 			return err
 		}
-
+		examName := "code"
+		for _, exam := range examList.StudentsExams {
+			switch exam.ExamLevel {
+			case 1:
+				lvl1++
+				examName = "code"
+				break
+			case 2:
+				lvl2++
+				examName = "Manoeuvre"
+				break
+			case 3:
+				lvl3++
+				examName = "Circuit"
+				break
+			}
+		}
 		pdf.CellFormat(50, 10, tr(mln.FR)+" "+tr(mfn.FR), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(15, 10, "B", "1", 0, "C", false, 0, "")
-		pdf.CellFormat(30, 10, "code", "1", 0, "C", false, 0, "")
-		status := "ajourné"
-		if exam.Status == true {
-			status = "réussie"
-		}
-		pdf.CellFormat(30, 10, tr(status), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(30, 10, examName, "1", 0, "C", false, 0, "")
+		pdf.CellFormat(30, 10, tr(""), "1", 0, "C", false, 0, "")
 		pdf.Ln(-1)
 	}
 	pdf.SetFont("Arial", "B", 14)
@@ -230,20 +287,29 @@ func (s *Service) ExportExamListPDF(id uint) error {
 	pdf.Cellf(50, 10, tr("Candidats convoqués: %d"), len(examList.StudentsExams))
 	pdf.Ln(-1)
 
-	pdf.Cellf(50, 10, "Code: %d", len(examList.StudentsExams))
+	pdf.Cellf(50, 10, "Code: %d", lvl1)
 	pdf.Cell(50, 10, "Code:")
 	pdf.Ln(-1)
 
-	pdf.Cellf(50, 10, "Manoeuvre: %d", len(examList.StudentsExams))
+	pdf.Cellf(50, 10, "Manoeuvre: %d", lvl2)
 	pdf.Cell(50, 10, "Manoeuvre:")
 	pdf.Ln(-1)
 
-	pdf.Cellf(50, 10, "Circulation: %d", len(examList.StudentsExams))
+	pdf.Cellf(50, 10, "Circulation: %d", lvl3)
 	pdf.Cell(50, 10, "Circulation:")
 	pdf.Ln(-1)
 
 	pdf.CellFormat(0, 10, "Signature de l'inspecteur", "", 0, "R", false, 0, "")
 	pdf.Ln(-1)
 
-	return pdf.OutputFileAndClose("exam.pdf")
+	yy, mm, dd := examList.DateExam.Date()
+	yys := strconv.Itoa(yy)
+	dds := strconv.Itoa(dd)
+	nameFile := strings.Join([]string{dds, mm.String(), yys}, "-")
+	dir, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	p := path.Join(dir, "Desktop", nameFile+".pdf")
+	return pdf.OutputFileAndClose(p)
 }

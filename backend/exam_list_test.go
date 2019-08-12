@@ -12,9 +12,10 @@ func testCreateExamList(t *testing.T) {
 
 	for i := 0; i < len(students); i++ {
 		exam := &Exam{
-			Exam:      1,
+			ExamLevel: uint8(3),
 			DateExam:  time.Now(),
 			Status:    false,
+			Student:   nil,
 			StudentID: uint(i + 1),
 		}
 		exams = append(exams, exam)
@@ -30,7 +31,7 @@ func testCreateExamList(t *testing.T) {
 	// Get an examList map from a model
 	m, err := getExamListMapFromModel(examList)
 	if err != nil {
-		log.Fatal(err)
+		t.Error(err)
 	}
 
 	//create an exam list
@@ -49,17 +50,18 @@ func testGetExamList(t *testing.T) {
 	id := uint(1)
 	examList, err := MainService.GetExamList(id)
 	if err != nil {
-		log.Fatal(err)
+		t.Error(err)
 	}
+	if examList != nil {
+		if examList.ID != id {
+			t.Errorf("There is an error, the id should be %d but got %d",
+				id, examList.ID)
+		}
 
-	if examList.ID != id {
-		t.Errorf("There is an error, the id should be %d but got %d",
-			id, examList.ID)
-	}
-
-	if len(examList.StudentsExams) != len(students) {
-		t.Errorf("There is an error, the length should be %d but got %d",
-			len(students), len(examList.StudentsExams))
+		if len(examList.StudentsExams) != len(students) {
+			t.Errorf("There is an error, the length should be %d but got %d",
+				len(students), len(examList.StudentsExams))
+		}
 	}
 }
 
@@ -82,33 +84,23 @@ func testUpdateExamList(t *testing.T) {
 
 	// Get exams from db and convert them to map
 	exams := []*Exam{}
-	if err := MainService.db.Find(&exams).Limit(5).Error; err != nil {
-		log.Fatalf("Error find exams: %s", err)
-	}
-
 	examList, _ := MainService.GetExamList(1)
-	studentDeletedFromExamList := make([]interface{}, 0)
-	examList.StudentsExams = []*Exam{}
-	for i := 0; i < len(exams); i++ {
-		if i%2 == 0 {
-			examList.StudentsExams = append(examList.StudentsExams, exams[i])
-		} else {
-			studentDeletedFromExamList = append(studentDeletedFromExamList,
-				exams[i].ID)
+	for _, exam := range examList.StudentsExams {
+		if exam.ID%2 == 0 {
+			exams = append(exams, exam)
 		}
 	}
+	examList.StudentsExams = exams
+	examList.Archived = true
+	examList.StudentsExams[0].Status = true
 	m, e := getExamListMapFromModel(*examList)
 	if e != nil {
 		t.Fatal(e)
 	}
 
-	ex, err := MainService.UpdateExamList(m, studentDeletedFromExamList)
+	_, err := MainService.UpdateExamList(m)
 	if err != nil {
 		t.Fatal(err)
-	}
-	if len(ex.StudentsExams) != len(exams)-len(studentDeletedFromExamList) {
-		t.Errorf("There is an error the length should be %d, but got %d",
-			len(exams)-len(studentDeletedFromExamList), len(ex.StudentsExams))
 	}
 }
 
